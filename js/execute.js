@@ -1,44 +1,49 @@
 $(document).ready(function () {
-    'use strict';
 
-    var $canvasArea = $('#board');
+'use strict';
 
-    $canvasArea.html(
-        '<canvas ' +
-            'id="canvas" ' +
-            'width="' + $canvasArea.width() + '" ' +
-            'height="' + $canvasArea.height() + '">' +
-        '</canvas>'
-    );
+var $canvasArea = $('#board');
 
-    var $canvas = $('#canvas'),
-        draw = createDraw({
-            context: $canvas[0].getContext('2d'),
-            width: $canvas.width(),
-            height: $canvas.height()
-        });
+$canvasArea.html(
+    '<canvas ' +
+        'id="canvas" ' +
+        'width="' + $canvasArea.width() + '" ' +
+        'height="' + $canvasArea.height() + '">' +
+    '</canvas>'
+);
 
-    draw.circle({
-        coord: {x: 40, y: 50},
-        size: 50
+var $canvas = $('#canvas'),
+
+    WIDTH = $canvas.width(),
+    HEIGHT = $canvas.height(),
+
+    draw = createDraw({
+        context: $canvas[0].getContext('2d'),
+        width: WIDTH,
+        height: HEIGHT
+    }),
+
+    spriteSheet = new Image(),
+
+    boardView = createBoardView({
+        draw: draw,
+        pieceDrawer: createPieceDrawer({
+            draw: draw,
+            sprite: spriteSheet,
+            square: {
+                width: WIDTH / 8,
+                height: HEIGHT / 8
+            }
+        }),
+        width: WIDTH,
+        height: HEIGHT
     });
 
-    draw.disc({
-        coord: {x: 250, y: 300},
-        size: 70,
-        color: "pink"
-    });
+boardView.renderSquares();
+spriteSheet.src = "img/pieces.png";
+spriteSheet.onload = function () {
+    log("loaded pieces.png");
+    boardView.renderPieces();
+};
 
-    draw.rectangle({
-        coord: {x: 10, y: 20},
-        width: 30,
-        height: 50,
-        color: "orange"
-    });
-
-    draw.square({
-        coord: {x: 120, y: 150},
-        size: 100,
-        color: "green"
-    });
 });

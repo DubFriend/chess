@@ -90,11 +90,13 @@ class Index_View extends View {
             '{{/css}}' .
         '</head>' .
         '<body>' .
-            '<h1>Hello</h1>' .
-            '<div id="board"></div>' .
-            '{{#js}}' .
-                '<script src="{{.}}"></script>' .
-            '{{/js}}' .
+            '<div class="wrap">' .
+                '<h1>Hello</h1>' .
+                '<div id="board"></div>' .
+                '{{#js}}' .
+                    '<script src="{{.}}"></script>' .
+                '{{/js}}' .
+            '</div>' .
         '</body>' .
         '</html>';
     }
@@ -128,6 +130,9 @@ class Index_Controller extends Controller {
                 $libPath . "jsmessage.js",
                 $libPath . "log.js",
                 $libPath . "draw.js",
+                $path . "global.js",
+                $path . "board.js",
+                $path . "board_view.js",
                 $path . "execute.js"
             )
         );

@@ -47,7 +47,28 @@ var createDraw = function (fig) {
         },
 
         image: function (fig) {
-            ctx.drawImage(image, x, y);
+            if(fig.clip) {
+                ctx.drawImage(
+                    fig.img,
+                    fig.clip.coord.x,
+                    fig.clip.coord.y,
+                    fig.clip.width,
+                    fig.clip.height,
+                    fig.coord.x,
+                    fig.coord.y,
+                    fig.width,
+                    fig.height
+                );
+            }
+            else {
+                ctx.drawImage(
+                    fig.img,
+                    fig.coord.x,
+                    fig.coord.y,
+                    fig.width,
+                    fig.height
+                );
+            }
         },
 
         clear: function () {

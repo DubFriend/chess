@@ -1,16 +1,21 @@
+#board {
+    width: 500px;
+    height: 500px;
+}
+
 html, body {
     color: rgb(60, 60, 60);
     font-size: 16px;
     text-align: left;
     font-family: helvetica, sans-serif;
     line-height: 1.5;
-}
-
-#board {
-    width: 500px;
-    height: 500px;
+    margin: 0;
 }
 
 canvas {
     background-color: gray;
+}
+
+.wrap {
+    margin: 2em;
 }
