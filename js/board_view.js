@@ -5,37 +5,36 @@ var createPieceDrawer = function (fig) {
         sprite = fig.sprite,
         square = fig.square,
         pad = 3, //padding in pixels
-        king = {
-            width: 96,
-            xcoord: 288
-        },
-        piece = function (type, side, coord) {
-            var ycoord = side === SIDE.black ? 0 : 108;
-            return draw.image({
-                img: sprite,
-                coord: {
-                    x: coord.x + pad,
-                    y: coord.y + pad
-                },
-                width: square.width - 2 * pad,
-                height: square.height - 2 * pad,
-                clip: {
-                    coord: {
-                        x: king.xcoord,
-                        y: ycoord
-                    },
-                    width: king.width,
-                    height: 108
-                }
-            });
-        };
+        config = {};
 
-    that.king = _.partial(piece, KING);
-    that.queen = _.partial(piece, QUEEN);
-    that.rook = _.partial(piece, ROOK);
-    that.knight = _.partial(piece, KNIGHT);
-    that.bishop = _.partial(piece, BISHOP);
-    that.pawn = _.partial(piece, PAWN);
+    //piece specific configurations.
+    config[PIECE.king] = { xcoord: 290, width: 95 };
+    config[PIECE.queen] = { xcoord: 190, width: 95 };
+    config[PIECE.bishop] = { xcoord: 90, width: 95 };
+    config[PIECE.knight] = { xcoord: 395, width: 95 };
+    config[PIECE.rook] = { xcoord: 0, width: 90 };
+    config[PIECE.pawn] = { xcoord: 500, width: 70 };
+
+    that.draw = function (type, side, coord) {
+        var ycoord = side === SIDE.black ? 0 : 108;
+        return draw.image({
+            img: sprite,
+            coord: {
+                x: coord.x + pad,
+                y: coord.y + pad
+            },
+            width: square.width - 2 * pad,
+            height: square.height - 2 * pad,
+            clip: {
+                coord: {
+                    x: config[type].xcoord,
+                    y: ycoord
+                },
+                width: config[type].width,
+                height: 108
+            }
+        });
+    };
 
     return that;
 };
@@ -70,6 +69,10 @@ var createBoardView = function (fig) {
 
         squareColor = function (isDarkSquare) {
             return isDarkSquare ? square.color.dark : square.color.light;
+        },
+
+        drawPiece = function (type, side, coord) {
+            pieceDrawer.draw(type, side, mapCoord(coord.x, coord.y));
         };
 
     //draw the game board
@@ -88,7 +91,17 @@ var createBoardView = function (fig) {
 
     //render all the pieces onto the board
     that.renderPieces = function (pieces) {
-        pieceDrawer.king(SIDE.black, mapCoord(3, 0));
+        drawPiece(PIECE.king, SIDE.black, { x: 3, y: 0 });
+        drawPiece(PIECE.queen, SIDE.black, { x: 4, y: 0 });
+        drawPiece(PIECE.bishop, SIDE.black, { x: 5, y: 0 });
+        drawPiece(PIECE.bishop, SIDE.black, { x: 2, y: 0 });
+        drawPiece(PIECE.knight, SIDE.black, { x: 6, y: 0 });
+        drawPiece(PIECE.knight, SIDE.black, { x: 1, y: 0 });
+        drawPiece(PIECE.rook, SIDE.black, { x: 7, y: 0 });
+        drawPiece(PIECE.rook, SIDE.black, { x: 0, y: 0 });
+        _.each(_.range(8), function (col) {
+            drawPiece(PIECE.pawn, SIDE.black, { x: col, y: 1 });
+        });
     };
 
     return that;

@@ -1,9 +1,12 @@
-var KING = "k",
-    QUEEN = "q",
-    ROOK = "r",
-    KNIGHT = "n",
-    BISHOP = "b",
-    PAWN = "p",
+var PIECE = {
+        king: "k",
+        queen: "q",
+        rook: "r",
+        knight: "n",
+        bishop: "b",
+        pawn: "p"
+    },
+
     SIDE = {
         black: "b",
         white: "w"
