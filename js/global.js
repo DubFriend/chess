@@ -10,4 +10,8 @@ var PIECE = {
     SIDE = {
         black: "b",
         white: "w"
+    },
+
+    GAME_STATUS = {
+        newGame: "new"
     };

@@ -13,9 +13,10 @@
             callbackData = undefined;
             callbackData2 = undefined;
             callbackData3 = undefined;
-            publisher.subscribe(callback, "topic1");
-            publisher.subscribe(callback2, "topic2");
-            publisher.subscribe(callback3, "topic2");
+
+            publisher.subscribe("topic1", callback);
+            publisher.subscribe("topic2", callback2);
+            publisher.subscribe("topic2", callback3);
         }
     });
 
@@ -27,11 +28,11 @@
     });
 
     test("publish/subscribe", function () {
-        publisher.publish("foo", "topic2");
+        publisher.publish("topic2", "foo");
         deepEqual(callbackData, undefined, "doesnt call wrong topic callback");
         deepEqual(callbackData2, "foo", "callbackData2 recieved");
         deepEqual(callbackData3, "foo", "callbackData3 recieved");
-        publisher.publish("bar", "topic1");
+        publisher.publish("topic1", "bar");
         deepEqual(callbackData, "bar", "callbackData1 recieved");
         deepEqual(callbackData2, "foo", "callbackData2 unchanged");
         deepEqual(callbackData3, "foo", "callbackData3 unchanged");
@@ -39,17 +40,17 @@
 
     test("unsubscribe", function () {
         publisher.unsubscribe(callback2, "topic2");
-        publisher.publish("bar", "topic2");
+        publisher.publish("topic2", "bar");
         deepEqual(callbackData2, undefined, "callbackData2 not updated");
         deepEqual(callbackData3, "bar", "callbackData3 is updated");
     });
 
     test("unsubscribe from all topics", function () {
-        publisher.subscribe(callback2, "topic1");
+        publisher.subscribe("topic1", callback2);
         publisher.unsubscribe(callback2);
-        publisher.publish("foo", "topic1");
+        publisher.publish("topic1", "foo");
         deepEqual(callbackData2, undefined, "callbackData2 not updated");
-        publisher.publish("bar", "topic2");
+        publisher.publish("topic2", "bar");
         deepEqual(callbackData2, undefined, "callbackData2 not updated");
         deepEqual(callbackData3, "bar", "callbackData3 is updated");
     });
@@ -60,14 +61,14 @@
                 callback4Data = data;
             };
 
-        publisher.subscribe(callback4);
-        publisher.publish("foo");
+        publisher.subscribe(null, callback4);
+        publisher.publish(null, "foo");
         deepEqual(callback4Data, "foo", "callback set if no topic set");
-        publisher.publish("bar", "topic1");
+        publisher.publish("topic1", "bar");
         deepEqual(callback4Data, "bar", "callback set even if topic is set");
 
         publisher.unsubscribe(callback4);
-        publisher.publish("baz");
+        publisher.publish(null, "baz");
         deepEqual(callback4Data, "bar", "callback is unsubscribed");
     });
 

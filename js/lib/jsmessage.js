@@ -24,17 +24,7 @@ var push             = ArrayProto.push,
 // All **ECMAScript 5** native function implementations that we hope to use
 // are declared here.
 var nativeForEach      = ArrayProto.forEach,
-    //nativeMap          = ArrayProto.map,
-    //nativeReduce       = ArrayProto.reduce,
-    //nativeReduceRight  = ArrayProto.reduceRight,
     nativeFilter       = ArrayProto.filter;
-    //nativeEvery        = ArrayProto.every,
-    //nativeSome         = ArrayProto.some,
-    //nativeIndexOf      = ArrayProto.indexOf,
-    //nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    //nativeIsArray      = Array.isArray,
-    //nativeKeys         = Object.keys,
-    //nativeBind         = FuncProto.bind;
 
 var lib = {};
 
@@ -68,8 +58,6 @@ lib.each = function (obj, iterator, context) {
 
 // Return all the elements that pass a truth test.
 // Delegates to **ECMAScript 5**'s native `filter` if available.
-// Aliased as `select`.
-//_.filter = _.select = function(obj, iterator, context) {
 lib.filter = function (obj, iterator, context) {
     var results = [];
     if (obj == null) {
@@ -96,11 +84,17 @@ lib.has = function(obj, key) {
     return hasOwnProperty.call(obj, key);
 };
 
+// end underscore
 
 
-//--------------------- end underscore subset ----------------------------------
-
-
+// _____________________________________________________________________________
+//
+// ---------------------------   jsMessage   -----------------------------------
+//
+// jsMessage provides mixins for publish/subscribe, and event binding patterns.
+//
+// Author : Brian Detering | BDeterin@gmail.com
+// GitHub : https://github.com/DubFriend/jsmessage
 
 var messaging = {};
 //attache to the global object, or to exports (for nodejs)
@@ -125,7 +119,7 @@ messaging.mixinPubSub = function (object) {
     var subscribers = {},
         universalSubscribers = [];
 
-    object.subscribe = function (callback, topic) {
+    object.subscribe = function (topic, callback) {
         if(topic) {
             subscribers[topic] = subscribers[topic] || [];
             subscribers[topic].push(callback);
@@ -160,7 +154,7 @@ messaging.mixinPubSub = function (object) {
         }
     };
 
-    object.publish = function (data, topic) {
+    object.publish = function (topic, data) {
         if(topic) {
             lib.each(subscribers[topic], function (callback) {
                 callback(data);
@@ -169,7 +163,9 @@ messaging.mixinPubSub = function (object) {
         else {
             lib.each(subscribers, function (values, topic) {
                 lib.each(values, function (callback) {
-                    callback(data);
+                    if(callback) {
+                        callback(data);
+                    }
                 });
             });
         }
