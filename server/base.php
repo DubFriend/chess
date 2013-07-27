@@ -118,6 +118,33 @@ class Index_Controller extends Controller {
         );
     }
 
+    private function getJs() {
+        $path = "js/";
+        $libPath = $path . "lib/";
+        $chess = "chessboard-0.1.0";
+        if(DEPLOYMENT === "development") {
+            return array(
+                $libPath . "jquery-2.0.3.js",
+                $libPath . "underscore.js",
+                $libPath . "mustache.js",
+                $libPath . "jsmessage.js",
+                $libPath . "log.js",
+                $path . $chess . ".js",
+                $path . "global.js",
+                $path . "board.js",
+                $path . "execute.js"
+            );
+        }
+        else {
+            return array(
+                $libPath . "jquery-2.0.3.js",
+                $libPath . "underscore.js",
+                $libPath . "mustache.js",
+                "chess.min.js"
+            );
+        }
+    }
+
     private function pageData() {
         $path = "js/";
         $libPath = $path . "lib/";
@@ -128,17 +155,7 @@ class Index_Controller extends Controller {
                 "css/style.css",
                 "css/" . $chess . ".css"
             ),
-            "js" => array(
-                $libPath . "jquery-2.0.3.js",
-                $libPath . "underscore.js",
-                $libPath . "mustache.js",
-                $libPath . "jsmessage.js",
-                $libPath . "log.js",
-                $path . $chess . ".js",
-                $path . "global.js",
-                $path . "board.js",
-                $path . "execute.js"
-            )
+            "js" => $this->getJs()
         );
     }
 }

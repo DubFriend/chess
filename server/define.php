@@ -4,7 +4,7 @@ define("DEBUG_OUTPUT_TYPE", "html"); // command_line, html
 define("IS_DEBUG_MESSAGES_ON", true);
 
 //error reporting level
-define("DEPLOYMENT", "development"); // production, development
+define("DEPLOYMENT", "production"); // production, development
 
 //database connection settings
 define("DATABASE_HOST", "localhost");
