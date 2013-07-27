@@ -126,7 +126,7 @@ class Index_Controller extends Controller {
             "title" => "Chess",
             "css" => array(
                 "css/style.css",
-                $chess . "/css/" . $chess . ".css",
+                "css/" . $chess . ".css"
             ),
             "js" => array(
                 $libPath . "jquery-2.0.3.js",
@@ -134,11 +134,9 @@ class Index_Controller extends Controller {
                 $libPath . "mustache.js",
                 $libPath . "jsmessage.js",
                 $libPath . "log.js",
-                $libPath . "draw.js",
-                $chess . "/js/" . $chess . ".js",
+                $path . $chess . ".js",
                 $path . "global.js",
                 $path . "board.js",
-                $path . "board_view.js",
                 $path . "execute.js"
             )
         );
