@@ -1,8 +1,9 @@
 (function () {
     // !NOTE! only getting a single instance of results (problem clearing stack)
+    // TODO qunit has async tests.
     var results = log("foo", {stack: true});
-    module("log");
     setTimeout(function () {
+        module("log");
         test("log", function () {
             var lineSplit = results.line.split(':');
             deepEqual(results.message, "foo", "message set");

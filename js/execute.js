@@ -1,8 +1,7 @@
 $(document).ready(function () {
-
 'use strict';
-
-var $canvasArea = $('#board');
+/*
+var $canvasArea = $('#board-area');
 
 $canvasArea.html(
     '<canvas ' +
@@ -39,11 +38,15 @@ var $canvas = $('#canvas'),
         height: HEIGHT
     });
 
+
 boardView.renderSquares();
 spriteSheet.src = "img/pieces.png";
 spriteSheet.onload = function () {
     log("loaded pieces.png");
     boardView.renderPieces();
 };
+*/
 
-});
+var board = new ChessBoard('board', 'start');
+
+});//end document ready

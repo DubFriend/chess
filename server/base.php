@@ -85,14 +85,15 @@ class Index_View extends View {
         '<head>' .
             '<meta charset="utf-8">' .
             '<title>{{title}}</title>' .
+            '<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">' .
+            '<link rel="icon" href="favicon.ico" type="image/x-icon">' .
             '{{#css}}' .
                 '<link href="{{.}}" rel="stylesheet">' .
             '{{/css}}' .
         '</head>' .
         '<body>' .
             '<div class="wrap">' .
-                '<h1>Hello</h1>' .
-                '<div id="board"></div>' .
+                '<div id="board" style="width: 500px"></div>' .
                 '{{#js}}' .
                     '<script src="{{.}}"></script>' .
                 '{{/js}}' .
@@ -120,9 +121,13 @@ class Index_Controller extends Controller {
     private function pageData() {
         $path = "js/";
         $libPath = $path . "lib/";
+        $chess = "chessboard-0.1.0";
         return array(
             "title" => "Chess",
-            "css" => array("css/style.css"),
+            "css" => array(
+                "css/style.css",
+                $chess . "/css/" . $chess . ".css",
+            ),
             "js" => array(
                 $libPath . "jquery-2.0.3.js",
                 $libPath . "underscore.js",
@@ -130,6 +135,7 @@ class Index_Controller extends Controller {
                 $libPath . "jsmessage.js",
                 $libPath . "log.js",
                 $libPath . "draw.js",
+                $chess . "/js/" . $chess . ".js",
                 $path . "global.js",
                 $path . "board.js",
                 $path . "board_view.js",

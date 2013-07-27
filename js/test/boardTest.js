@@ -2,14 +2,19 @@
 "use strict";
 
 var boardModel,
-    boardData;
+    boardData,
+    sideData;
 
 module("boardModel", {
     setup: function () {
         boardData = undefined;
+        sideData = undefined;
         boardModel = createBoardModel();
         boardModel.subscribe("board", function (data) {
             boardData = data;
+        });
+        boardModel.subscribe("side", function (data) {
+            sideData = data;
         });
     }
 });
@@ -25,14 +30,14 @@ test("initial board piece setup", function () {
 
         homeRow = function (side) {
             return [
-                { type: PIECE.rook, side: SIDE.black },
-                { type: PIECE.knight, side: SIDE.black },
-                { type: PIECE.bishop, side: SIDE.black },
-                { type: PIECE.king, side: SIDE.black },
-                { type: PIECE.queen, side: SIDE.black },
-                { type: PIECE.bishop, side: SIDE.black },
-                { type: PIECE.knight, side: SIDE.black },
-                { type: PIECE.rook, side: SIDE.black }
+                { type: PIECE.rook, side: side },
+                { type: PIECE.knight, side: side },
+                { type: PIECE.bishop, side: side },
+                { type: PIECE.king, side: side },
+                { type: PIECE.queen, side: side },
+                { type: PIECE.bishop, side: side },
+                { type: PIECE.knight, side: side },
+                { type: PIECE.rook, side: side }
             ];
         },
 
@@ -56,6 +61,8 @@ test("initial board piece setup", function () {
         ],
         "pieces are set up for a new game"
     );
+
+    deepEqual(sideData, SIDE.white, "side started on white");
 });
 
 }());

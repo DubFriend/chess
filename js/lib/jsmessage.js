@@ -1,8 +1,16 @@
+// _____________________________________________________________________________
+//
+// ---------------------------   jsMessage   -----------------------------------
+//
+// jsMessage provides mixins for publish/subscribe, and event binding patterns.
+//
+// Author : Brian Detering | BDeterin@gmail.com | BrianDetering.net
+// GitHub : github.com/DubFriend/jsmessage
+
 (function () {
 "use strict";
 
-//------------------ Underscore Subset, renamed to "lib" -----------------------
-
+// ----------------- Underscore Subset, renamed to "lib" -----------------------
 //     Underscore.js 1.5.1
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -84,17 +92,10 @@ lib.has = function(obj, key) {
     return hasOwnProperty.call(obj, key);
 };
 
-// end underscore
+
+//--------------------------- end underscore -----------------------------------
 
 
-// _____________________________________________________________________________
-//
-// ---------------------------   jsMessage   -----------------------------------
-//
-// jsMessage provides mixins for publish/subscribe, and event binding patterns.
-//
-// Author : Brian Detering | BDeterin@gmail.com
-// GitHub : https://github.com/DubFriend/jsmessage
 
 var messaging = {};
 //attache to the global object, or to exports (for nodejs)
@@ -172,6 +173,21 @@ messaging.mixinPubSub = function (object) {
         lib.each(universalSubscribers, function (callback) {
             callback(data);
         });
+    };
+
+    object.autoPublish = function (topic) {
+        var data, that = this;
+        //if setData provided, then sets data and publishes it.
+        //otherwise just gets the data.
+        return function (setData) {
+            if(setData === undefined) {
+                return data;
+            }
+            else {
+                data = setData;
+                that.publish(topic, setData);
+            }
+        };
     };
 
     return object;

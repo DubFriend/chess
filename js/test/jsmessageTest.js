@@ -72,6 +72,16 @@
         deepEqual(callback4Data, "bar", "callback is unsubscribed");
     });
 
+    test("autoPublish", function () {
+        var setterAndGetter = publisher.autoPublish("topic1");
+        setterAndGetter("bar");
+        deepEqual(callbackData, "bar", "automatically publishes on set");
+        callbackData = null;
+        var data = setterAndGetter();
+        deepEqual(data, "bar", "gets data if no argument passed");
+        deepEqual(callbackData, null, "callbackData not updated on get");
+    });
+
 }());
 
 
