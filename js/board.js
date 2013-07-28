@@ -1,6 +1,12 @@
 (function () {
 "use strict";
 
+// ---------------------------- Board Model ------------------------------------
+// The board Model takes care of managing the state of the board, and handling,
+// board level rules such as castling, moving into check, and en passant.  The
+// Board Model should try to remain unaware of the types that each piece is (let
+// the Piece Models handle piece specific Logic).
+
 this.createBoardModel = function (fig) {
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
@@ -94,7 +100,10 @@ this.createBoardModel = function (fig) {
 
 
 // ----------------------------- Piece Models ----------------------------------
-
+// Piece Models understand how they can move in relation to the board and other
+// pieces, but are not aware of board level rules (such as moving into check).
+// Piece Models understand that other pieces are black or white, but not which
+// type (king, rook, etc.) the other pieces are.
 
 var pieceModel = {};
 this.createPieceModel = pieceModel;
@@ -188,52 +197,24 @@ var createPieceModelBase = function (type, fig, my) {
         }());
     };
 
+    var advance = function (dx, dy, coord) {
+        return { x: coord.x + dx, y: coord.y + dy };
+    };
+
     my.horizontal = function (coord) {
-        return line(
-            coord,
-            function (coord) {
-                return { x: coord.x - 1, y: coord.y };
-            },
-            function (coord) {
-                return { x: coord.x + 1, y: coord.y };
-            }
-        );
+        return line(coord, _.partial(advance, -1, 0), _.partial(advance, 1, 0));
     };
 
     my.vertical = function (coord) {
-        return line(
-            coord,
-            function (coord) {
-                return { x: coord.x, y: coord.y + 1 };
-            },
-            function (coord) {
-                return { x: coord.x, y: coord.y - 1};
-            }
-        );
+        return line(coord, _.partial(advance, 0, 1), _.partial(advance, 0, -1));
     };
 
     my.rising = function (coord) {
-        return line(
-            coord,
-            function (coord) {
-                return { x: coord.x + 1, y: coord.y - 1 };
-            },
-            function (coord) {
-                return { x: coord.x - 1, y: coord.y + 1 };
-            }
-        );
+        return line(coord, _.partial(advance, 1, -1), _.partial(advance, -1, 1));
     };
 
     my.falling = function (coord) {
-        return line(
-            coord,
-            function (coord) {
-                return { x: coord.x + 1, y: coord.y + 1 };
-            },
-            function (coord) {
-                return { x: coord.x - 1, y: coord.y - 1 };
-            }
-        );
+        return line(coord, _.partial(advance, 1, 1), _.partial(advance, -1, -1));
     };
 
     return that;
