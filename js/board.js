@@ -179,42 +179,44 @@ var createPieceModelBase = function (type, fig, my) {
     };
 
     var createIsProgressBlocked = function () {
-        return (function () {
-            var stopProgress = false;
-            return function (coord) {
-                var isBlocked = false;
-                if(stopProgress) {
-                    isBlocked = true;
-                }
-                else if(my.isAlly(coord)) {
-                    isBlocked = true;
-                }
-                else if(my.isOpponent(coord)) {
-                    stopProgress = true;
-                }
-                return isBlocked;
-            };
-        }());
+        var stopProgress = false;
+        return function (coord) {
+            var isBlocked = false;
+            if(stopProgress) {
+                isBlocked = true;
+            }
+            else if(my.isAlly(coord)) {
+                isBlocked = true;
+            }
+            else if(my.isOpponent(coord)) {
+                stopProgress = true;
+            }
+            return isBlocked;
+        };
     };
 
-    var advance = function (dx, dy, coord) {
+    my.advance = function (dx, dy, coord) {
         return { x: coord.x + dx, y: coord.y + dy };
     };
 
+    var advance = function (dx, dy) {
+        return _.partial(my.advance, dx, dy);
+    };
+
     my.horizontal = function (coord) {
-        return line(coord, _.partial(advance, -1, 0), _.partial(advance, 1, 0));
+        return line(coord, advance(-1, 0), advance(1, 0));
     };
 
     my.vertical = function (coord) {
-        return line(coord, _.partial(advance, 0, 1), _.partial(advance, 0, -1));
+        return line(coord, advance(0, 1), advance(0, -1));
     };
 
     my.rising = function (coord) {
-        return line(coord, _.partial(advance, 1, -1), _.partial(advance, -1, 1));
+        return line(coord, advance(1, -1), advance(-1, 1));
     };
 
     my.falling = function (coord) {
-        return line(coord, _.partial(advance, 1, 1), _.partial(advance, -1, -1));
+        return line(coord, advance(1, 1), advance(-1, -1));
     };
 
     return that;
@@ -226,16 +228,15 @@ pieceModel.king = function (fig) {
     var my = {},
         that = createPieceModelBase(PIECE.king, fig, my),
         rawMoves = function (coord) {
-            return _.filter([
-                { x: coord.x + 1, y: coord.y + 1 },
-                { x: coord.x + 1, y: coord.y },
-                { x: coord.x + 1, y: coord.y - 1 },
-                { x: coord.x, y: coord.y + 1 },
-                { x: coord.x, y: coord.y - 1 },
-                { x: coord.x - 1, y: coord.y + 1 },
-                { x: coord.x - 1, y: coord.y },
-                { x: coord.x - 1, y: coord.y - 1 }
-            ], my.isOnBoard);
+            return _.filter(
+                _.map(
+                    [[1,1],[1,0],[1,-1],[0,1],[0,-1],[-1,1],[-1,0],[-1,-1]],
+                    function (move) {
+                        return my.advance(move[0], move[1], coord);
+                    }
+                ),
+                my.isOnBoard
+            );
         };
 
     that.isMoved = false;
@@ -304,14 +305,12 @@ pieceModel.knight = function (fig) {
 
     my.getMoves = function (coord) {
         return _.filter(
-           [{ x: coord.x - 2, y: coord.y - 1 },
-            { x: coord.x - 2, y: coord.y + 1 },
-            { x: coord.x - 1, y: coord.y - 2 },
-            { x: coord.x - 1, y: coord.y + 2 },
-            { x: coord.x + 1, y: coord.y - 2 },
-            { x: coord.x + 1, y: coord.y + 2 },
-            { x: coord.x + 2, y: coord.y - 1 },
-            { x: coord.x + 2, y: coord.y + 1 }],
+            _.map(
+                [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]],
+                function (move) {
+                    return my.advance(move[0], move[1], coord);
+                }
+            ),
             function (coord) {
                 return my.isOnBoard(coord) && !my.isAlly(coord);
             }

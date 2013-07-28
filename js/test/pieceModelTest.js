@@ -299,14 +299,13 @@ test("type", function () {
 
 test("getMoves", function () {
     deepEqual(
-        pawn.getMoves({x: 1, y: 1}, blankBoard()),
-       [{ x: 1, y: 2},
-        { x: 1, y: 3}],
+        pawn.getMoves({ x: 1, y: 1 }, blankBoard()),
+       [{ x: 1, y: 2}, { x: 1, y: 3}],
         "correct moves from home row"
     );
 
     deepEqual(
-        pawn.getMoves({x: 0, y: 3}, blankBoard()),
+        pawn.getMoves({ x: 0, y: 3 }, blankBoard()),
         [{ x: 0, y: 4}],
         "correct moves off home row"
     );
@@ -318,7 +317,33 @@ test("getMoves", function () {
     deepEqual(
         pawn.getMoves({ x: 2, y: 2 }, populatedBoard),
         [{x: 3, y: 3 }],
-        "respects blocked paths, and attacks diagonally"
+        "respects blocked paths, and attacks diagonally (black)"
+    );
+});
+
+test("getMoves - white pawn", function () {
+    var pawn = createPieceModel.pawn({ side: SIDE.white });
+
+    deepEqual(
+        pawn.getMoves({ x: 1, y: 6 }, blankBoard()),
+       [{ x: 1, y: 5}, { x: 1, y: 4}],
+        "correct moves from home row"
+    );
+
+    deepEqual(
+        pawn.getMoves({ x: 1, y: 5 }, blankBoard()),
+        [{ x: 1, y: 4}],
+        "correct moves off home row"
+    );
+
+    var populatedBoard = blankBoard();
+    populatedBoard[1][4] = whitePawn();
+    populatedBoard[2][4] = blackPawn();
+    populatedBoard[3][4] = blackPawn();
+    deepEqual(
+        pawn.getMoves({ x: 2, y: 5 }, populatedBoard),
+        [{x: 3, y: 4 }],
+        "respects blocked paths, and attacks diagonally (white)"
     );
 });
 
