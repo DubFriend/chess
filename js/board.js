@@ -93,7 +93,7 @@ this.createBoardModel = function (fig) {
 };
 
 
-
+// ----------------------------- Piece Models ----------------------------------
 
 
 var pieceModel = {};
@@ -130,7 +130,9 @@ var createPieceModelBase = function (type, fig, my) {
     };
 
     var getSquare = function (coord) {
-        return my.tempBoard[coord.x][coord.y];
+        if(my.isOnBoard(coord)) {
+            return my.tempBoard[coord.x][coord.y];
+        }
     };
 
     //returns null | PIECE.white | PIECE.black, depending on whats on the square.
@@ -144,7 +146,6 @@ var createPieceModelBase = function (type, fig, my) {
             b = that.side();
         return (a === SIDE.white && b === SIDE.black ||
                 a === SIDE.black && b === SIDE.white);
-        //return sideOnSquare(coord) !== that.side();
     };
 
     my.isAlly = function (coord) {
@@ -239,9 +240,6 @@ var createPieceModelBase = function (type, fig, my) {
 };
 
 
-
-
-
 pieceModel.king = function (fig) {
     fig = fig || {};
     var my = {},
@@ -271,7 +269,6 @@ pieceModel.king = function (fig) {
 };
 
 
-
 pieceModel.queen = function (fig) {
     fig = fig || {};
     var my = {},
@@ -293,7 +290,6 @@ pieceModel.queen = function (fig) {
 };
 
 
-
 pieceModel.rook = function (fig) {
     fig = fig || {};
     var my = {},
@@ -307,7 +303,6 @@ pieceModel.rook = function (fig) {
 };
 
 
-
 pieceModel.bishop = function (fig) {
     fig = fig || {};
     var my = {},
@@ -319,7 +314,6 @@ pieceModel.bishop = function (fig) {
 
     return that;
 };
-
 
 
 pieceModel.knight = function (fig) {
@@ -337,7 +331,9 @@ pieceModel.knight = function (fig) {
             { x: coord.x + 1, y: coord.y + 2 },
             { x: coord.x + 2, y: coord.y - 1 },
             { x: coord.x + 2, y: coord.y + 1 }],
-            my.isOnBoard
+            function (coord) {
+                return my.isOnBoard(coord) && !my.isAlly(coord);
+            }
         );
     };
 
@@ -345,11 +341,11 @@ pieceModel.knight = function (fig) {
 };
 
 
-
 pieceModel.pawn = function (fig) {
     fig = fig || {};
     var my = {},
         that = createPieceModelBase(PIECE.pawn, fig, my),
+
         movesRaw = function (coord) {
             var moves = [];
             if(that.side() === SIDE.black) {
@@ -364,11 +360,42 @@ pieceModel.pawn = function (fig) {
                     moves.push({ x: coord.x, y: coord.y - 2 });
                 }
             }
-            return _.filter(moves, my.isOnBoard);
+            return _.filter(moves, function (coord) {
+                return ( my.isOnBoard(coord) &&
+                        !my.isOpponent(coord) &&
+                        !my.isAlly(coord) );
+            });
+        },
+
+        attackMoves = function (coord) {
+            var moves = [];
+            if(that.side() === SIDE.black) {
+                _.each(
+                    [{ x: coord.x + 1, y: coord.y + 1 },
+                     { x: coord.x - 1, y: coord.y + 1 }],
+                    function (coord) {
+                        if(my.isOpponent(coord)) {
+                            moves.push(coord);
+                        }
+                    }
+                );
+            }
+            else {
+                _.each(
+                    [{ x: coord.x + 1, y: coord.y - 1 },
+                     { x: coord.x - 1, y: coord.y - 1}],
+                    function (coord) {
+                        if(my.isOpponent(coord)) {
+                            moves.push(coord);
+                        }
+                    }
+                );
+            }
+            return moves;
         };
 
     my.getMoves = function (coord) {
-        return movesRaw(coord);
+        return _.union(movesRaw(coord), attackMoves(coord));
     };
 
     return that;

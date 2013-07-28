@@ -89,6 +89,8 @@ var whitePawn = function () {
     return mockPiece({ side: SIDE.white, type: PIECE.pawn });
 };
 
+
+
 var king;
 module("King Model", {
     setup: function () {
@@ -152,6 +154,15 @@ test("type", function () {
     deepEqual(queen.type(), PIECE.queen, "type is set");
 });
 
+var populatedBoard = function () {
+    var board = blankBoard();
+    board[0][2] = blackPawn();
+    board[4][2] = whitePawn();
+    board[2][3] = blackPawn();
+    board[3][3] = whitePawn();
+    return board;
+};
+
 test("getMoves", function () {
     var coord = { x: 1, y: 1 };
     deepEqual(
@@ -165,19 +176,16 @@ test("getMoves", function () {
         "correct queen moves returned"
     );
 
-    var populatedBoard = blankBoard();
-    populatedBoard[0][2] = blackPawn();
-    populatedBoard[4][2] = whitePawn();
-    populatedBoard[2][3] = blackPawn();
-    populatedBoard[3][3] = whitePawn();
     deepEqual(
-        queen.getMoves({ x: 2, y: 2 }, populatedBoard),
+        queen.getMoves({ x: 2, y: 2 }, populatedBoard()),
         [{ x: 1, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 2, y: 1 },
          { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 0 }, { x: 1, y: 3 },
          { x: 0, y: 4 }, { x: 3, y: 3 }, { x: 1, y: 1 }, { x: 0, y: 0 }],
         "respects blocked paths"
     );
 });
+
+
 
 var rook;
 module("Rook Model", {
@@ -197,7 +205,16 @@ test("getMoves", function () {
         _.union(horizontal(coord), vertical(coord)),
         "correct rook moves returned"
     );
+
+    deepEqual(
+        rook.getMoves({ x: 2, y: 2 }, populatedBoard()),
+        [{ x: 1, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+         { x: 2, y: 1 }, { x: 2, y: 0 }],
+        "respects blocked paths"
+    );
 });
+
+
 
 var bishop;
 module("Bishop Model", {
@@ -217,7 +234,18 @@ test("getMoves", function () {
         _.union(rising(coord), falling(coord)),
         "correct bishop moves returned"
     );
+
+    var testBoard = populatedBoard();
+    testBoard[1][3] = blackPawn();
+    deepEqual(
+        bishop.getMoves({ x: 2, y: 2 }, testBoard),
+        [{ x: 3, y: 1 }, { x: 4, y: 0 }, { x: 3, y: 3 },
+         { x: 1, y: 1 }, { x: 0, y: 0 }],
+        "respects blocked paths"
+    );
 });
+
+
 
 var knight;
 module("Knight Model", {
@@ -241,7 +269,22 @@ test("getMoves", function () {
         { x: 7, y: 4 }],
         "correct knight moves set"
     );
+
+    var populatedBoard = blankBoard();
+    populatedBoard[1][0] = whitePawn();
+    populatedBoard[3][0] = blackPawn();
+    populatedBoard[1][1] = blackPawn();
+    populatedBoard[2][1] = blackPawn();
+    populatedBoard[1][2] = blackPawn();
+    deepEqual(
+        knight.getMoves({ x: 2, y: 2 }, populatedBoard),
+        [{ x: 0, y: 1 }, { x: 0, y: 3 }, { x: 1, y: 0 }, { x: 1, y: 4 },
+         { x: 3, y: 4 }, { x: 4, y: 1 }, { x: 4, y: 3 }],
+        "does not land on square occupied by own player"
+    );
 });
+
+
 
 var pawn;
 module("Pawn Model", {
@@ -267,8 +310,17 @@ test("getMoves", function () {
         [{ x: 0, y: 4}],
         "correct moves off home row"
     );
-});
 
+    var populatedBoard = blankBoard();
+    populatedBoard[1][3] = blackPawn();
+    populatedBoard[2][3] = whitePawn();
+    populatedBoard[3][3] = whitePawn();
+    deepEqual(
+        pawn.getMoves({ x: 2, y: 2 }, populatedBoard),
+        [{x: 3, y: 3 }],
+        "respects blocked paths, and attacks diagonally"
+    );
+});
 
 
 }()); //end outer iife
