@@ -73,7 +73,21 @@ var blankBoard = function () {
         return _.pad(8, null);
     });
 };
-//console.log("Blank Board\n" + JSON.stringify(blankBoard()));
+
+var mockPiece = function (fig) {
+    return {
+        side: function () { return fig.side; },
+        type: function () { return fig.type; }
+    };
+};
+
+var blackPawn = function () {
+    return mockPiece({ side: SIDE.black, type: PIECE.pawn });
+};
+
+var whitePawn = function () {
+    return mockPiece({ side: SIDE.white, type: PIECE.pawn });
+};
 
 var king;
 module("King Model", {
@@ -112,16 +126,9 @@ test("getMoves", function () {
         "off the sides ok"
     );
 
-    var mockPiece = function (fig) {
-        return {
-            side: function () { return fig.side; },
-            type: function () { return fig.type; }
-        };
-    };
-
     var populatedBoard = blankBoard();
-    populatedBoard[1][2] = mockPiece({ side: SIDE.white, type: PIECE.pawn });
-    populatedBoard[3][2] = mockPiece({ side: SIDE.black, type: PIECE.pawn });
+    populatedBoard[1][2] = whitePawn();
+    populatedBoard[3][2] = blackPawn();
     deepEqual(
         king.getMoves({ x: 2, y: 2 }, populatedBoard),
         [{ x: 3, y: 3 },
@@ -131,7 +138,7 @@ test("getMoves", function () {
          { x: 1, y: 3 },
          { x: 1, y: 2 },
          { x: 1, y: 1 }],
-        "accounts for blocked paths"
+        "respects blocked paths"
     );
 });
 
@@ -141,7 +148,7 @@ var queen;
 module("Queen Model", {
     setup: function () {
         queen = createPieceModel.queen({
-            side: SIDE.white
+            side: SIDE.black
         });
     }
 });
@@ -162,6 +169,19 @@ test("getMoves", function () {
         ),
         "correct queen moves returned"
     );
+
+    var populatedBoard = blankBoard();
+    populatedBoard[0][2] = blackPawn();
+    populatedBoard[4][2] = whitePawn();
+    populatedBoard[2][3] = blackPawn();
+    populatedBoard[3][3] = whitePawn();
+/*
+    deepEqual(
+        queen.getMoves({ x: 2, y: 2 }, populatedBoard),
+        "foo",
+        "respects blocked paths"
+    );
+*/
 });
 
 var rook;
