@@ -226,25 +226,22 @@ var createPieceModelBase = function (type, fig, my) {
 pieceModel.king = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(PIECE.king, fig, my),
-        rawMoves = function (coord) {
-            return _.filter(
-                _.map(
-                    [[1,1],[1,0],[1,-1],[0,1],[0,-1],[-1,1],[-1,0],[-1,-1]],
-                    function (move) {
-                        return my.advance(move[0], move[1], coord);
-                    }
-                ),
-                my.isOnBoard
-            );
-        };
+        that = createPieceModelBase(PIECE.king, fig, my);
 
     that.isMoved = false;
 
     my.getMoves = function (coord) {
-        return _.filter(rawMoves(coord), function (coord) {
-            return !my.isAlly(coord);
-        });
+        return _.filter(
+            _.map(
+                [[1,1],[1,0],[1,-1],[0,1],[0,-1],[-1,1],[-1,0],[-1,-1]],
+                function (move) {
+                    return my.advance(move[0], move[1], coord);
+                }
+            ),
+            function (move) {
+                return my.isOnBoard(move) && !my.isAlly(move);
+            }
+        );
     };
 
     return that;
@@ -254,18 +251,15 @@ pieceModel.king = function (fig) {
 pieceModel.queen = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(PIECE.queen, fig, my),
-        rawMoves = function (coord) {
-            return _.union(
-                my.horizontal(coord),
-                my.vertical(coord),
-                my.rising(coord),
-                my.falling(coord)
-            );
-        };
+        that = createPieceModelBase(PIECE.queen, fig, my);
 
     my.getMoves = function (coord) {
-        return rawMoves(coord);
+        return _.union(
+            my.horizontal(coord),
+            my.vertical(coord),
+            my.rising(coord),
+            my.falling(coord)
+        );
     };
 
     return that;
@@ -327,19 +321,22 @@ pieceModel.pawn = function (fig) {
         that = createPieceModelBase(PIECE.pawn, fig, my),
 
         movesRaw = function (coord) {
-            var moves = [];
+            var moves = [], forward, homeRow;
+
             if(that.side() === SIDE.black) {
-                moves.push({ x: coord.x, y: coord.y + 1 });
-                if(coord.y === 1) {
-                    moves.push({ x: coord.x, y: coord.y + 2 });
-                }
+                forward = 1;
+                homeRow = 1;
             }
             else {
-                moves.push({ x: coord.x, y: coord.y - 1 });
-                if(coord.y === 6) {
-                    moves.push({ x: coord.x, y: coord.y - 2 });
-                }
+                forward = -1;
+                homeRow = 6;
             }
+
+            moves.push({ x: coord.x, y: coord.y + forward });
+            if(coord.y === homeRow) {
+                moves.push({ x: coord.x, y: coord.y + forward * 2 });
+            }
+
             return _.filter(moves, function (coord) {
                 return ( my.isOnBoard(coord) &&
                         !my.isOpponent(coord) &&
@@ -348,30 +345,12 @@ pieceModel.pawn = function (fig) {
         },
 
         attackMoves = function (coord) {
-            var moves = [];
-            if(that.side() === SIDE.black) {
-                _.each(
-                    [{ x: coord.x + 1, y: coord.y + 1 },
-                     { x: coord.x - 1, y: coord.y + 1 }],
-                    function (coord) {
-                        if(my.isOpponent(coord)) {
-                            moves.push(coord);
-                        }
-                    }
-                );
-            }
-            else {
-                _.each(
-                    [{ x: coord.x + 1, y: coord.y - 1 },
-                     { x: coord.x - 1, y: coord.y - 1}],
-                    function (coord) {
-                        if(my.isOpponent(coord)) {
-                            moves.push(coord);
-                        }
-                    }
-                );
-            }
-            return moves;
+            var forward = that.side() === SIDE.black ? 1 : -1;
+            return _.filter(
+                [{ x: coord.x + 1, y: coord.y + forward },
+                 { x: coord.x - 1, y: coord.y + forward }],
+                my.isOpponent
+            );
         };
 
     my.getMoves = function (coord) {
