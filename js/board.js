@@ -99,18 +99,55 @@ this.createBoardModel = function (fig) {
 var pieceModel = {};
 this.createPieceModel = pieceModel;
 
-var createPieceModelBase = function (fig, my) {
+var createPieceModelBase = function (type, fig, my) {
     fig = fig || {};
     var that = {};
-
-    my.side = fig.side;
 
     that.side = function () {
         return my.side;
     };
 
+    that.type = function () {
+        return type;
+    };
+
+    my.side = fig.side;
+
     my.isOnBoard = function (coord) {
         return coord.x >= 0 && coord.x < 8 && coord.y >= 0 && coord.y < 8;
+    };
+
+    var getSquare = function (coord, board) {
+        return board[coord.x][coord.y];
+    };
+
+    //returns null | PIECE.white | PIECE.black, depending on whats on the square.
+    var sideOnSquare = function (coord, board) {
+        var square = getSquare(coord, board);
+        return square && square.side();
+    };
+
+    my.isOpponent = function (coord, board) {
+        return sideOnSquare(coord, board) !== that.side();
+    };
+
+    my.isAlly = function (coord, board) {
+        return sideOnSquare(coord, board) === that.side();
+    };
+
+    var line = function (coord, advanceA, advanceB) {
+        var a = advanceA(coord),
+            b = advanceB(coord),
+            moves = [];
+        while(my.isOnBoard(a)) {
+            moves.push(a);
+            a = advanceA(a);
+        }
+        while(my.isOnBoard(b)) {
+            moves.push(b);
+            b = advanceB(b);
+        }
+        return moves;
     };
 
     my.horizontal = function (coord) {
@@ -161,21 +198,6 @@ var createPieceModelBase = function (fig, my) {
         );
     };
 
-    var line = function (coord, advanceA, advanceB) {
-        var a = advanceA(coord),
-            b = advanceB(coord),
-            moves = [];
-        while(my.isOnBoard(a)) {
-            moves.push(a);
-            a = advanceA(a);
-        }
-        while(my.isOnBoard(b)) {
-            moves.push(b);
-            b = advanceB(b);
-        }
-        return moves;
-    };
-
     return that;
 };
 
@@ -186,21 +208,31 @@ var createPieceModelBase = function (fig, my) {
 pieceModel.king = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my);
+        that = createPieceModelBase(PIECE.king, fig, my),
+        rawMoves = function (coord, board) {
+            return _.filter([
+                { x: coord.x + 1, y: coord.y + 1 },
+                { x: coord.x + 1, y: coord.y },
+                { x: coord.x + 1, y: coord.y - 1 },
+                { x: coord.x, y: coord.y + 1 },
+                { x: coord.x, y: coord.y - 1 },
+                { x: coord.x - 1, y: coord.y + 1 },
+                { x: coord.x - 1, y: coord.y },
+                { x: coord.x - 1, y: coord.y - 1 }
+            ], my.isOnBoard);
+        },
+
+        filterBlockedPaths = function (coords) {
+            return coords;
+        };
 
     that.isMoved = false;
 
-    that.getMoves = function (coord) {
-        return _.filter([
-            { x: coord.x + 1, y: coord.y + 1 },
-            { x: coord.x + 1, y: coord.y },
-            { x: coord.x + 1, y: coord.y - 1 },
-            { x: coord.x, y: coord.y + 1 },
-            { x: coord.x, y: coord.y - 1 },
-            { x: coord.x - 1, y: coord.y + 1},
-            { x: coord.x - 1, y: coord.y },
-            { x: coord.x - 1, y: coord.y - 1 }
-        ], my.isOnBoard);
+    that.getMoves = function (coord, board) {
+
+        return _.filter(rawMoves(coord, board), function (coord) {
+            return !my.isAlly(coord, board);
+        });
     };
 
     return that;
@@ -211,9 +243,9 @@ pieceModel.king = function (fig) {
 pieceModel.queen = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my);
+        that = createPieceModelBase(PIECE.queen, fig, my);
 
-    that.getMoves = function (coord) {
+    that.getMoves = function (coord, board) {
         return _.union(
             my.horizontal(coord),
             my.vertical(coord),
@@ -230,9 +262,9 @@ pieceModel.queen = function (fig) {
 pieceModel.rook = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my);
+        that = createPieceModelBase(PIECE.rook, fig, my);
 
-    that.getMoves = function (coord) {
+    that.getMoves = function (coord, board) {
         return _.union(my.horizontal(coord), my.vertical(coord));
     };
 
@@ -244,9 +276,9 @@ pieceModel.rook = function (fig) {
 pieceModel.bishop = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my);
+        that = createPieceModelBase(PIECE.bishop, fig, my);
 
-    that.getMoves = function (coord) {
+    that.getMoves = function (coord, board) {
         return _.union(my.rising(coord), my.falling(coord));
     };
 
@@ -258,9 +290,9 @@ pieceModel.bishop = function (fig) {
 pieceModel.knight = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my);
+        that = createPieceModelBase(PIECE.knight, fig, my);
 
-    that.getMoves = function (coord) {
+    that.getMoves = function (coord, board) {
         return _.filter(
            [{ x: coord.x - 2, y: coord.y - 1 },
             { x: coord.x - 2, y: coord.y + 1 },
@@ -282,8 +314,8 @@ pieceModel.knight = function (fig) {
 pieceModel.pawn = function (fig) {
     fig = fig || {};
     var my = {},
-        that = createPieceModelBase(fig, my),
-        movesIgnoreBoard = function (coord) {
+        that = createPieceModelBase(PIECE.pawn, fig, my),
+        movesRaw = function (coord, board) {
             var moves = [];
             if(that.side() === SIDE.black) {
                 moves.push({ x: coord.x, y: coord.y + 1 });
@@ -297,11 +329,11 @@ pieceModel.pawn = function (fig) {
                     moves.push({ x: coord.x, y: coord.y - 2 });
                 }
             }
-            return moves;
+            return _.filter(moves, my.isOnBoard);
         };
 
-    that.getMoves = function (coord) {
-        return _.filter(movesIgnoreBoard(coord), my.isOnBoard);
+    that.getMoves = function (coord, board) {
+        return movesRaw(coord, board);//_.filter(movesRaw(coord), my.isOnBoard);
     };
 
     return that;

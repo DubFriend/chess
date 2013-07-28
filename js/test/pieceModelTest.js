@@ -68,18 +68,31 @@ var falling = function (coord) {
     );
 };
 
+var blankBoard = function () {
+    return _.map(_.range(8), function () {
+        return _.pad(8, null);
+    });
+};
+//console.log("Blank Board\n" + JSON.stringify(blankBoard()));
+
 var king;
 module("King Model", {
     setup: function () {
-        king = createPieceModel.king({
-            side: SIDE.black
-        });
+        king = createPieceModel.king({ side: SIDE.black });
     }
+});
+
+test("side (on all pieces)", function () {
+    deepEqual(king.side(), SIDE.black, "side is set");
+});
+
+test("type", function () {
+    deepEqual(king.type(), PIECE.king, "type is set");
 });
 
 test("getMoves", function () {
     deepEqual(
-        king.getMoves({ x: 0, y: 0 }),
+        king.getMoves({ x: 0, y: 0 }, blankBoard()),
        [{x: 1, y: 1},
         {x: 1, y: 0},
         {x: 0, y: 1}],
@@ -87,7 +100,7 @@ test("getMoves", function () {
     );
 
     deepEqual(
-        king.getMoves({ x: 1, y: 1}),
+        king.getMoves({ x: 1, y: 1}, blankBoard()),
        [{x: 2, y: 2},
         {x: 2, y: 1},
         {x: 2, y: 0},
@@ -98,11 +111,31 @@ test("getMoves", function () {
         {x: 0, y: 0}],
         "off the sides ok"
     );
+
+    var mockPiece = function (fig) {
+        return {
+            side: function () { return fig.side; },
+            type: function () { return fig.type; }
+        };
+    };
+
+    var populatedBoard = blankBoard();
+    populatedBoard[1][2] = mockPiece({ side: SIDE.white, type: PIECE.pawn });
+    populatedBoard[3][2] = mockPiece({ side: SIDE.black, type: PIECE.pawn });
+    deepEqual(
+        king.getMoves({ x: 2, y: 2 }, populatedBoard),
+        [{ x: 3, y: 3 },
+         { x: 3, y: 1 },
+         { x: 2, y: 3 },
+         { x: 2, y: 1 },
+         { x: 1, y: 3 },
+         { x: 1, y: 2 },
+         { x: 1, y: 1 }],
+        "accounts for blocked paths"
+    );
 });
 
-test("side (on all pieces)", function () {
-    deepEqual(king.side(), SIDE.black, "side is set");
-});
+
 
 var queen;
 module("Queen Model", {
@@ -113,10 +146,14 @@ module("Queen Model", {
     }
 });
 
+test("type", function () {
+    deepEqual(queen.type(), PIECE.queen, "type is set");
+});
+
 test("getMoves", function () {
     var coord = { x: 1, y: 1 };
     deepEqual(
-        queen.getMoves(coord),
+        queen.getMoves(coord, blankBoard()),
         _.union(
             horizontal(coord),
             vertical(coord),
@@ -134,10 +171,14 @@ module("Rook Model", {
     }
 });
 
+test("type", function () {
+    deepEqual(rook.type(), PIECE.rook, "type is set");
+});
+
 test("getMoves", function () {
     var coord = { x: 5, y: 5 };
     deepEqual(
-        rook.getMoves(coord),
+        rook.getMoves(coord, blankBoard()),
         _.union(horizontal(coord), vertical(coord)),
         "correct rook moves returned"
     );
@@ -150,10 +191,14 @@ module("Bishop Model", {
     }
 });
 
+test("type", function () {
+    deepEqual(bishop.type(), PIECE.bishop, "type is set");
+});
+
 test("getMoves", function () {
     var coord = { x: 3, y: 2 };
     deepEqual(
-        bishop.getMoves(coord),
+        bishop.getMoves(coord, blankBoard()),
         _.union(rising(coord), falling(coord)),
         "correct bishop moves returned"
     );
@@ -166,9 +211,13 @@ module("Knight Model", {
     }
 });
 
+test("type", function () {
+    deepEqual(knight.type(), PIECE.knight, "type is set");
+});
+
 test("getMoves", function () {
     deepEqual(
-        knight.getMoves({ x: 6, y: 2 }),
+        knight.getMoves({ x: 6, y: 2 }, blankBoard()),
        [{ x: 4, y: 1 },
         { x: 4, y: 3 },
         { x: 5, y: 0 },
@@ -186,19 +235,25 @@ module("Pawn Model", {
     }
 });
 
+test("type", function () {
+    deepEqual(pawn.type(), PIECE.pawn, "type is set");
+});
+
 test("getMoves", function () {
     deepEqual(
-        pawn.getMoves({x: 1, y: 1}),
+        pawn.getMoves({x: 1, y: 1}, blankBoard()),
        [{ x: 1, y: 2},
         { x: 1, y: 3}],
         "correct moves from home row"
     );
 
     deepEqual(
-        pawn.getMoves({x: 0, y: 3}),
+        pawn.getMoves({x: 0, y: 3}, blankBoard()),
         [{ x: 0, y: 4}],
         "correct moves off home row"
     );
 });
 
-}());
+
+
+}()); //end outer iife

@@ -126,7 +126,7 @@ class Index_Controller extends Controller {
             return array(
                 $libPath . "jquery-2.0.3.js",
                 $libPath . "underscore.js",
-                $libPath . "mustache.js",
+                //$libPath . "mustache.js",
                 $libPath . "jsmessage.js",
                 $libPath . "log.js",
                 $path . $chess . ".js",
