@@ -140,22 +140,28 @@ var createPieceModelBase = function (type, fig, my) {
     };
 
     my.isOpponent = function (coord) {
-        return sideOnSquare(coord) !== that.side();
+        var a = sideOnSquare(coord),
+            b = that.side();
+        return (a === SIDE.white && b === SIDE.black ||
+                a === SIDE.black && b === SIDE.white);
+        //return sideOnSquare(coord) !== that.side();
     };
 
     my.isAlly = function (coord) {
         return sideOnSquare(coord) === that.side();
     };
 
-    var line = function (coord, advanceA, advanceB, isBlocked) {
+    var line = function (coord, advanceA, advanceB) {
         var a = advanceA(coord),
             b = advanceB(coord),
+            isBlockedA = createIsProgressBlocked(),
+            isBlockedB = createIsProgressBlocked(),
             moves = [];
-        while(my.isOnBoard(a) && !isBlocked(a)) {
+        while(my.isOnBoard(a) && !isBlockedA(a)) {
             moves.push(a);
             a = advanceA(a);
         }
-        while(my.isOnBoard(b) && !isBlocked(b)) {
+        while(my.isOnBoard(b) && !isBlockedB(b)) {
             moves.push(b);
             b = advanceB(b);
         }
@@ -166,14 +172,17 @@ var createPieceModelBase = function (type, fig, my) {
         return (function () {
             var stopProgress = false;
             return function (coord) {
-                var isContinue;
+                var isBlocked = false;
                 if(stopProgress) {
-                    isContinue = false;
+                    isBlocked = true;
                 }
                 else if(my.isAlly(coord)) {
-
+                    isBlocked = true;
                 }
-                return isContinue;
+                else if(my.isOpponent(coord)) {
+                    stopProgress = true;
+                }
+                return isBlocked;
             };
         }());
     };
@@ -186,8 +195,7 @@ var createPieceModelBase = function (type, fig, my) {
             },
             function (coord) {
                 return { x: coord.x + 1, y: coord.y };
-            },
-            createIsProgressBlocked()
+            }
         );
     };
 
@@ -199,8 +207,7 @@ var createPieceModelBase = function (type, fig, my) {
             },
             function (coord) {
                 return { x: coord.x, y: coord.y - 1};
-            },
-            createIsProgressBlocked()
+            }
         );
     };
 
@@ -212,8 +219,7 @@ var createPieceModelBase = function (type, fig, my) {
             },
             function (coord) {
                 return { x: coord.x - 1, y: coord.y + 1 };
-            },
-            createIsProgressBlocked()
+            }
         );
     };
 
@@ -225,8 +231,7 @@ var createPieceModelBase = function (type, fig, my) {
             },
             function (coord) {
                 return { x: coord.x - 1, y: coord.y - 1 };
-            },
-            createIsProgressBlocked()
+            }
         );
     };
 

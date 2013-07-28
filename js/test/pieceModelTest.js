@@ -131,13 +131,8 @@ test("getMoves", function () {
     populatedBoard[3][2] = blackPawn();
     deepEqual(
         king.getMoves({ x: 2, y: 2 }, populatedBoard),
-        [{ x: 3, y: 3 },
-         { x: 3, y: 1 },
-         { x: 2, y: 3 },
-         { x: 2, y: 1 },
-         { x: 1, y: 3 },
-         { x: 1, y: 2 },
-         { x: 1, y: 1 }],
+        [{ x: 3, y: 3 }, { x: 3, y: 1 }, { x: 2, y: 3 }, { x: 2, y: 1 },
+         { x: 1, y: 3 }, { x: 1, y: 2 }, { x: 1, y: 1 }],
         "respects blocked paths"
     );
 });
@@ -175,13 +170,13 @@ test("getMoves", function () {
     populatedBoard[4][2] = whitePawn();
     populatedBoard[2][3] = blackPawn();
     populatedBoard[3][3] = whitePawn();
-/*
     deepEqual(
         queen.getMoves({ x: 2, y: 2 }, populatedBoard),
-        "foo",
+        [{ x: 1, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 2, y: 1 },
+         { x: 2, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 0 }, { x: 1, y: 3 },
+         { x: 0, y: 4 }, { x: 3, y: 3 }, { x: 1, y: 1 }, { x: 0, y: 0 }],
         "respects blocked paths"
     );
-*/
 });
 
 var rook;
