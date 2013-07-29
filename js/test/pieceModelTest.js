@@ -68,29 +68,6 @@ var falling = function (coord) {
     );
 };
 
-var blankBoard = function () {
-    return _.map(_.range(8), function () {
-        return _.pad(8, null);
-    });
-};
-
-var mockPiece = function (fig) {
-    return {
-        side: function () { return fig.side; },
-        type: function () { return fig.type; }
-    };
-};
-
-var blackPawn = function () {
-    return mockPiece({ side: SIDE.black, type: PIECE.pawn });
-};
-
-var whitePawn = function () {
-    return mockPiece({ side: SIDE.white, type: PIECE.pawn });
-};
-
-
-
 var king;
 module("King Model", {
     setup: function () {
@@ -108,7 +85,7 @@ test("type", function () {
 
 test("getMoves", function () {
     deepEqual(
-        king.getMoves({ x: 0, y: 0 }, blankBoard()),
+        king.getMoves({ x: 0, y: 0 }, tLib.blankBoard()),
        [{x: 1, y: 1},
         {x: 1, y: 0},
         {x: 0, y: 1}],
@@ -116,7 +93,7 @@ test("getMoves", function () {
     );
 
     deepEqual(
-        king.getMoves({ x: 1, y: 1}, blankBoard()),
+        king.getMoves({ x: 1, y: 1}, tLib.blankBoard()),
        [{x: 2, y: 2},
         {x: 2, y: 1},
         {x: 2, y: 0},
@@ -128,9 +105,9 @@ test("getMoves", function () {
         "off the sides ok"
     );
 
-    var populatedBoard = blankBoard();
-    populatedBoard[1][2] = whitePawn();
-    populatedBoard[3][2] = blackPawn();
+    var populatedBoard = tLib.blankBoard();
+    populatedBoard[1][2] = tLib.whitePawn();
+    populatedBoard[3][2] = tLib.blackPawn();
     deepEqual(
         king.getMoves({ x: 2, y: 2 }, populatedBoard),
         [{ x: 3, y: 3 }, { x: 3, y: 1 }, { x: 2, y: 3 }, { x: 2, y: 1 },
@@ -155,18 +132,18 @@ test("type", function () {
 });
 
 var populatedBoard = function () {
-    var board = blankBoard();
-    board[0][2] = blackPawn();
-    board[4][2] = whitePawn();
-    board[2][3] = blackPawn();
-    board[3][3] = whitePawn();
+    var board = tLib.blankBoard();
+    board[0][2] = tLib.blackPawn();
+    board[4][2] = tLib.whitePawn();
+    board[2][3] = tLib.blackPawn();
+    board[3][3] = tLib.whitePawn();
     return board;
 };
 
 test("getMoves", function () {
     var coord = { x: 1, y: 1 };
     deepEqual(
-        queen.getMoves(coord, blankBoard()),
+        queen.getMoves(coord, tLib.blankBoard()),
         _.union(
             horizontal(coord),
             vertical(coord),
@@ -201,7 +178,7 @@ test("type", function () {
 test("getMoves", function () {
     var coord = { x: 5, y: 5 };
     deepEqual(
-        rook.getMoves(coord, blankBoard()),
+        rook.getMoves(coord, tLib.blankBoard()),
         _.union(horizontal(coord), vertical(coord)),
         "correct rook moves returned"
     );
@@ -230,13 +207,13 @@ test("type", function () {
 test("getMoves", function () {
     var coord = { x: 3, y: 2 };
     deepEqual(
-        bishop.getMoves(coord, blankBoard()),
+        bishop.getMoves(coord, tLib.blankBoard()),
         _.union(rising(coord), falling(coord)),
         "correct bishop moves returned"
     );
 
     var testBoard = populatedBoard();
-    testBoard[1][3] = blackPawn();
+    testBoard[1][3] = tLib.blackPawn();
     deepEqual(
         bishop.getMoves({ x: 2, y: 2 }, testBoard),
         [{ x: 3, y: 1 }, { x: 4, y: 0 }, { x: 3, y: 3 },
@@ -260,7 +237,7 @@ test("type", function () {
 
 test("getMoves", function () {
     deepEqual(
-        knight.getMoves({ x: 6, y: 2 }, blankBoard()),
+        knight.getMoves({ x: 6, y: 2 }, tLib.blankBoard()),
        [{ x: 4, y: 1 },
         { x: 4, y: 3 },
         { x: 5, y: 0 },
@@ -270,12 +247,12 @@ test("getMoves", function () {
         "correct knight moves set"
     );
 
-    var populatedBoard = blankBoard();
-    populatedBoard[1][0] = whitePawn();
-    populatedBoard[3][0] = blackPawn();
-    populatedBoard[1][1] = blackPawn();
-    populatedBoard[2][1] = blackPawn();
-    populatedBoard[1][2] = blackPawn();
+    var populatedBoard = tLib.blankBoard();
+    populatedBoard[1][0] = tLib.whitePawn();
+    populatedBoard[3][0] = tLib.blackPawn();
+    populatedBoard[1][1] = tLib.blackPawn();
+    populatedBoard[2][1] = tLib.blackPawn();
+    populatedBoard[1][2] = tLib.blackPawn();
     deepEqual(
         knight.getMoves({ x: 2, y: 2 }, populatedBoard),
         [{ x: 0, y: 1 }, { x: 0, y: 3 }, { x: 1, y: 0 }, { x: 1, y: 4 },
@@ -299,21 +276,21 @@ test("type", function () {
 
 test("getMoves", function () {
     deepEqual(
-        pawn.getMoves({ x: 1, y: 1 }, blankBoard()),
+        pawn.getMoves({ x: 1, y: 1 }, tLib.blankBoard()),
        [{ x: 1, y: 2}, { x: 1, y: 3}],
         "correct moves from home row"
     );
 
     deepEqual(
-        pawn.getMoves({ x: 0, y: 3 }, blankBoard()),
+        pawn.getMoves({ x: 0, y: 3 }, tLib.blankBoard()),
         [{ x: 0, y: 4}],
         "correct moves off home row"
     );
 
-    var populatedBoard = blankBoard();
-    populatedBoard[1][3] = blackPawn();
-    populatedBoard[2][3] = whitePawn();
-    populatedBoard[3][3] = whitePawn();
+    var populatedBoard = tLib.blankBoard();
+    populatedBoard[1][3] = tLib.blackPawn();
+    populatedBoard[2][3] = tLib.whitePawn();
+    populatedBoard[3][3] = tLib.whitePawn();
     deepEqual(
         pawn.getMoves({ x: 2, y: 2 }, populatedBoard),
         [{x: 3, y: 3 }],
@@ -325,21 +302,21 @@ test("getMoves - white pawn", function () {
     var pawn = createPieceModel.pawn({ side: SIDE.white });
 
     deepEqual(
-        pawn.getMoves({ x: 1, y: 6 }, blankBoard()),
+        pawn.getMoves({ x: 1, y: 6 }, tLib.blankBoard()),
        [{ x: 1, y: 5}, { x: 1, y: 4}],
         "correct moves from home row"
     );
 
     deepEqual(
-        pawn.getMoves({ x: 1, y: 5 }, blankBoard()),
+        pawn.getMoves({ x: 1, y: 5 }, tLib.blankBoard()),
         [{ x: 1, y: 4}],
         "correct moves off home row"
     );
 
-    var populatedBoard = blankBoard();
-    populatedBoard[1][4] = whitePawn();
-    populatedBoard[2][4] = blackPawn();
-    populatedBoard[3][4] = blackPawn();
+    var populatedBoard = tLib.blankBoard();
+    populatedBoard[1][4] = tLib.whitePawn();
+    populatedBoard[2][4] = tLib.blackPawn();
+    populatedBoard[3][4] = tLib.blackPawn();
     deepEqual(
         pawn.getMoves({ x: 2, y: 5 }, populatedBoard),
         [{x: 3, y: 4 }],

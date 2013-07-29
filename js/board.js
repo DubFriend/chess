@@ -10,37 +10,36 @@
 this.createBoardModel = function (fig) {
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
-        board = that.autoPublish("board"),
+
+        board = that.autoPublish("board", function (rows) {
+            return _.map(rows, function (row) {
+                return _.map(row, function (square) {
+                    return square && { side: square.side(), type: square.type() };
+                });
+            });
+        }),
+
         side = that.autoPublish("side"),
 
         setupNewGameBoard = (function () {
             var homeRow = function (side) {
-                    return [
-                        { type: PIECE.rook, side: side },
-                        { type: PIECE.knight, side: side },
-                        { type: PIECE.bishop, side: side },
-                        { type: PIECE.king, side: side },
-                        { type: PIECE.queen, side: side },
-                        { type: PIECE.bishop, side: side },
-                        { type: PIECE.knight, side: side },
-                        { type: PIECE.rook, side: side }
-                    ];
+                    return _.map(
+                        ['rook', 'knight', 'bishop', 'king',
+                         'queen', 'bishop', 'knight', 'rook'],
+                        function (type) {
+                            return createPieceModel[type]({ side: side });
+                        }
+                    );
                 },
 
                 emptyRow = function () {
-                    var row = [];
-                    _.each(_.range(8), function () {
-                        row.push(null);
-                    });
-                    return row;
+                    return _.pad(8, null);
                 },
 
                 rowOfPawns = function (side) {
-                    var row = [];
-                    _.each(_.range(8), function () {
-                        row.push({ type: PIECE.pawn, side: side });
+                    return _.map(_.range(8), function () {
+                        return createPieceModel.pawn({ side: side });
                     });
-                    return row;
                 };
 
             return function () {
@@ -52,7 +51,6 @@ this.createBoardModel = function (fig) {
                     homeRow(SIDE.white)
                 ];
             };
-
         }()),
 
         //gets the value from the board of the passed coordinates

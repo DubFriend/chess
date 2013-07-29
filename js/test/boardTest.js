@@ -21,32 +21,23 @@ module("boardModel", {
 
 test("initial board piece setup", function () {
     var rowOfPawns = function (side) {
-            var row = [];
-            _.each(_.range(8), function () {
-                row.push({ type: PIECE.pawn, side: side });
+            return _.map(_.range(8), function () {
+                return { side: side, type: PIECE.pawn };
             });
-            return row;
         },
 
         homeRow = function (side) {
-            return [
-                { type: PIECE.rook, side: side },
-                { type: PIECE.knight, side: side },
-                { type: PIECE.bishop, side: side },
-                { type: PIECE.king, side: side },
-                { type: PIECE.queen, side: side },
-                { type: PIECE.bishop, side: side },
-                { type: PIECE.knight, side: side },
-                { type: PIECE.rook, side: side }
-            ];
+            return _.map(
+                [PIECE.rook, PIECE.knight, PIECE.bishop, PIECE.king,
+                 PIECE.queen, PIECE.bishop, PIECE.knight, PIECE.rook],
+                function (type) {
+                    return { side: side, type: type };
+                }
+            );
         },
 
         emptyRow = function () {
-            var row = [];
-            _.each(_.range(8), function () {
-                row.push(null);
-            });
-            return row;
+            return _.pad(8, null);
         };
 
     boardModel.newGame();

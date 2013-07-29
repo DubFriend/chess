@@ -82,6 +82,14 @@
         deepEqual(callbackData, null, "callbackData not updated on get");
     });
 
+    test("autoPublish - callback maps data", function () {
+        var setterAndGetter = publisher.autoPublish("topic1", function (data) {
+            return data.toUpperCase();
+        });
+        setterAndGetter("foo");
+        deepEqual(callbackData, "FOO", "published data is mapped by callback");
+    });
+
 }());
 
 

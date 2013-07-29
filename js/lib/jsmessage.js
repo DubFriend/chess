@@ -175,7 +175,7 @@ messaging.mixinPubSub = function (object) {
         });
     };
 
-    object.autoPublish = function (topic) {
+    object.autoPublish = function (topic, publishMap) {
         var data, that = this;
         //if setData provided, then sets data and publishes it.
         //otherwise just gets the data.
@@ -184,8 +184,8 @@ messaging.mixinPubSub = function (object) {
                 return data;
             }
             else {
-                data = setData;
-                that.publish(topic, setData);
+                data = publishMap ? publishMap(setData) : setData;
+                that.publish(topic, data);
             }
         };
     };
