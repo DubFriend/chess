@@ -55,7 +55,17 @@ this.createBoardModel = function (fig) {
                 ];
             };
         }()),
-
+/*
+        cloneBoard = function (board) {
+            return _.map(board, function (row) {
+                return _.map(row, function (square) {
+                    if(square) {
+                        return createPieceModel
+                    }
+                });
+            });
+        };
+*/
         //gets the value from the board of the passed coordinates
         getPiece = function (coord) {
             return board()[coord.y][coord.x];
@@ -86,13 +96,15 @@ this.createBoardModel = function (fig) {
         },
 
         canPieceMove = function (start, end) {
-            //console.log(start);
-            //console.log(extractBoardData(board()));
-            //console.log(getPiece(start).getMoves(start, board()));
             return _.find(
                 getPiece(start).getMoves(start, board()),
                 _.partial(_.isEqual, end)
             ) ? true : false;
+        },
+
+        isMoveIntoCheck = function (start, end) {
+            //todo, need clone of board.
+            return false;
         };
 
     //initialize state for testing
@@ -109,7 +121,11 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        if(isOwnPiece(start) && canPieceMove(start, end)) {
+        if(
+            isOwnPiece(start) &&
+            canPieceMove(start, end) &&
+            !isMoveIntoCheck(start, end)
+        ) {
             movePiece(start, end);
             changeSides();
             return true;

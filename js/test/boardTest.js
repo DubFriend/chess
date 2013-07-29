@@ -67,7 +67,7 @@ test("makeMove - ok", function () {
     boardData[5][0] = null;
     deepEqual(boardData, startingBoard(), "rest of pieces in correct places");
 });
-/*
+
 test("makeMove - fail - wrong player", function () {
     ok(!boardModel.makeMove({ x: 0, y: 1}, { x: 0, y: 2 }));
     deepEqual(boardData, startingBoard(), "board unchanged");
@@ -79,7 +79,7 @@ test("makeMove - fail - null square", function () {
 });
 
 test("makeMove - fail - break piece's move rules", function () {
-    ok(!boardModel.makeMove({ x: 0, y: 6 }, { x: 0, y: 4}));
+    ok(!boardModel.makeMove({ x: 0, y: 6 }, { x: 0, y: 3 }));
     deepEqual(boardData, startingBoard(), "board unchanged");
 });
 
@@ -107,8 +107,9 @@ test("makeMove - ok - puts opponent into check", function () {
 
 test("makeMove - fail - moves into check", function () {
     setupCheckTests(SIDE.black);
-    ok(true);
+    ok(!boardModel.makeMove({ x: 4, y: 2 }, { x: 4, y: 1 }));
+    deepEqual(boardData, startingBoard(), "board unchanged");
 });
-*/
+
 
 }());
