@@ -132,6 +132,7 @@ class Index_Controller extends Controller {
                 $path . $chess . ".js",
                 $path . "global.js",
                 $path . "board.js",
+                $path . "piece.js",
                 $path . "execute.js"
             );
         }
