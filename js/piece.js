@@ -41,7 +41,7 @@ var createPieceModelBase = function (type, fig, my) {
 
     var getSquare = function (coord) {
         if(my.isOnBoard(coord)) {
-            return my.tempBoard[coord.x][coord.y];
+            return my.tempBoard[coord.y][coord.x];
         }
     };
 

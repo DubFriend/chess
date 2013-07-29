@@ -11,13 +11,15 @@ this.createBoardModel = function (fig) {
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
 
-        board = that.autoPublish("board", function (rows) {
-            return _.map(rows, function (row) {
+        extractBoardData = function (board) {
+            return _.map(board, function (row) {
                 return _.map(row, function (square) {
                     return square && { side: square.side(), type: square.type() };
                 });
             });
-        }),
+        },
+
+        board = that.autoPublish("board", extractBoardData),
 
         side = that.autoPublish("side"),
 
@@ -80,13 +82,17 @@ this.createBoardModel = function (fig) {
 
         isOwnPiece = function (coord) {
             var piece = getPiece(coord);
-            console.log("own piece");
-            console.log(piece);
             return piece && piece.side() === side();
         },
 
-        isLegalMove = function (start, end) {
-            return true;//return isInCheck(SIDE.black, end);
+        canPieceMove = function (start, end) {
+            //console.log(start);
+            //console.log(extractBoardData(board()));
+            //console.log(getPiece(start).getMoves(start, board()));
+            return _.find(
+                getPiece(start).getMoves(start, board()),
+                _.partial(_.isEqual, end)
+            ) ? true : false;
         };
 
     //initialize state for testing
@@ -103,8 +109,7 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        //console.log(board());
-        if(isOwnPiece(start) && isLegalMove(start, end)) {
+        if(isOwnPiece(start) && canPieceMove(start, end)) {
             movePiece(start, end);
             changeSides();
             return true;
