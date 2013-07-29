@@ -42,6 +42,7 @@ this.createBoardModel = function (fig) {
                     });
                 };
 
+
             return function () {
                 return [
                     homeRow(SIDE.black),
@@ -55,14 +56,14 @@ this.createBoardModel = function (fig) {
 
         //gets the value from the board of the passed coordinates
         getPiece = function (coord) {
-            return board()[coord.x][coord.y];
+            return board()[coord.y][coord.x];
         },
 
         movePiece = function (start, end) {
             var tempBoard = board(),
                 piece = getPiece(start);
-            tempBoard[end.x][end.y] = piece;
-            tempBoard[start.x][start.y] = null;
+            tempBoard[end.y][end.x] = piece;
+            tempBoard[start.y][start.x] = null;
             if(piece.type === PIECE.king) {
                 isKingMoved[piece.side] = true;
             }
@@ -75,7 +76,26 @@ this.createBoardModel = function (fig) {
 
         changeSides = function () {
             side(opponentSide());
+        },
+
+        isOwnPiece = function (coord) {
+            var piece = getPiece(coord);
+            console.log("own piece");
+            console.log(piece);
+            return piece && piece.side() === side();
+        },
+
+        isLegalMove = function (start, end) {
+            return true;//return isInCheck(SIDE.black, end);
         };
+
+    //initialize state for testing
+    if(fig.board) {
+        board(fig.board);
+    }
+    if(fig.side) {
+        side(fig.side);
+    }
 
     that.newGame = function () {
         board(setupNewGameBoard());
@@ -83,7 +103,8 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        if(isBelongToPlayer(start) && isLegalMove(start, end)) {
+        //console.log(board());
+        if(isOwnPiece(start) && isLegalMove(start, end)) {
             movePiece(start, end);
             changeSides();
             return true;

@@ -180,12 +180,14 @@ messaging.mixinPubSub = function (object) {
         //if setData provided, then sets data and publishes it.
         //otherwise just gets the data.
         return function (setData) {
+            var publishData;
             if(setData === undefined) {
                 return data;
             }
             else {
-                data = publishMap ? publishMap(setData) : setData;
-                that.publish(topic, data);
+                data = setData;
+                publishData = publishMap ? publishMap(setData) : setData;
+                that.publish(topic, publishData);
             }
         };
     };
