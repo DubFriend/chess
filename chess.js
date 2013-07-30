@@ -180,12 +180,14 @@ messaging.mixinPubSub = function (object) {
         //if setData provided, then sets data and publishes it.
         //otherwise just gets the data.
         return function (setData) {
+            var publishData;
             if(setData === undefined) {
                 return data;
             }
             else {
-                data = publishMap ? publishMap(setData) : setData;
-                that.publish(topic, data);
+                data = setData;
+                publishData = publishMap ? publishMap(setData) : setData;
+                that.publish(topic, publishData);
             }
         };
     };
@@ -1964,7 +1966,7 @@ window.ChessBoard.objToFen = objToFen;
 ;//utility functions added into the underscore namespace.
 _.mixin({
     pad: function (num, val) {
-        return _.map(_.range(num), function () { return val; });
+        return this.map(this.range(num), function () { return val; });
     }
 });
 
@@ -1980,10 +1982,6 @@ var PIECE = {
     SIDE = {
         black: "b",
         white: "w"
-    },
-
-    GAME_STATUS = {
-        newGame: "new"
     };
 ;(function () {
 "use strict";
@@ -1998,13 +1996,15 @@ this.createBoardModel = function (fig) {
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
 
-        board = that.autoPublish("board", function (rows) {
-            return _.map(rows, function (row) {
+        extractBoardData = function (board) {
+            return _.map(board, function (row) {
                 return _.map(row, function (square) {
                     return square && { side: square.side(), type: square.type() };
                 });
             });
-        }),
+        },
+
+        board = that.autoPublish("board", extractBoardData),
 
         side = that.autoPublish("side"),
 
@@ -2040,29 +2040,110 @@ this.createBoardModel = function (fig) {
             };
         }()),
 
+        cloneBoard = function (board) {
+            return _.map(board, function (row) {
+                return _.map(row, function (square) {
+                    var type;
+                    if(square) {
+                        type = _.invert(PIECE)[square.type()];
+                        return createPieceModel[type]({ side: square.side() });
+                    }
+                    else {
+                        return null;
+                    }
+                });
+            });
+        },
+
         //gets the value from the board of the passed coordinates
-        getPiece = function (coord) {
-            return board()[coord.x][coord.y];
-        },
-
-        movePiece = function (start, end) {
-            var tempBoard = board(),
-                piece = getPiece(start);
-            tempBoard[end.x][end.y] = piece;
-            tempBoard[start.x][start.y] = null;
-            if(piece.type === PIECE.king) {
-                isKingMoved[piece.side] = true;
+        getPiece = function (coord, optBoard) {
+            if(optBoard) {
+                return optBoard[coord.y][coord.x];
             }
-            board(tempBoard);
+            else {
+                return board()[coord.y][coord.x];
+            }
         },
 
-        opponentSide = function () {
-            return side() === SIDE.black ? SIDE.white : SIDE.black;
+        setPiece = function (piece, coord, optBoard) {
+            if(optBoard) {
+                optBoard[coord.y][coord.x] = piece;
+            }
+            else {
+                var tempBoard = board();
+                tempBoard[coord.y][coord.x] = piece;
+                board(tempBoard);
+            }
+        },
+
+        movePiece = function (start, end, optBoard) {
+            setPiece(getPiece(start, optBoard), end, optBoard);
+            setPiece(null, start, optBoard);
+        },
+
+        opponentSide = function (optSide) {
+            var testSide = optSide || side();
+            return testSide === SIDE.black ? SIDE.white : SIDE.black;
         },
 
         changeSides = function () {
             side(opponentSide());
+        },
+
+        isOwnPiece = function (coord) {
+            var piece = getPiece(coord);
+            return piece && piece.side() === side();
+        },
+
+        canPieceMove = function (start, end) {
+            return _.find(
+                getPiece(start).getMoves(start, board()),
+                _.partial(_.isEqual, end)
+            ) ? true : false;
+        },
+
+        getKingPositions = function (board) {
+            var position = {};
+            _.each(board, function (row, y) {
+                _.each(row, function (square, x) {
+                    if(square && square.type() === PIECE.king) {
+                        position[square.side()] = { x: x, y: y };
+                    }
+                });
+            });
+            return position;
+        },
+
+        isInCheck = function (testSide, testBoard) {
+            var kingPosition = getKingPositions(testBoard)[testSide];
+            var isCheck;
+            _.each(testBoard, function (row, y) {
+                _.each(row, function (square, x) {
+                    if(square && square.side() === opponentSide(testSide)) {
+                        _.each(square.getMoves({x:x,y:y}, testBoard), function (move) {
+                            if(_.isEqual(move, kingPosition)) {
+                                isCheck = true;
+                            }
+                        });
+                    }
+                });
+            });
+            return isCheck;
+        },
+
+        isMoveIntoCheck = function (start, end) {
+            var tempBoard = cloneBoard(board());
+            movePiece(start, end, tempBoard);
+            return isInCheck(side(), tempBoard);
         };
+
+    //optionally initialize board state.
+    if(fig.board) {
+        board(fig.board);
+    }
+    if(fig.side) {
+        side(fig.side);
+    }
 
     that.newGame = function () {
         board(setupNewGameBoard());
@@ -2070,7 +2151,11 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        if(isBelongToPlayer(start) && isLegalMove(start, end)) {
+        if(
+            isOwnPiece(start)
+            && canPieceMove(start, end)
+            && !isMoveIntoCheck(start, end)
+        ) {
             movePiece(start, end);
             changeSides();
             return true;

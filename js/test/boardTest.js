@@ -88,7 +88,8 @@ var setupCheckTests = function (side) {
     board[2][2] = createPieceModel.king({ side: SIDE.black });
     board[2][4] = createPieceModel.rook({ side: SIDE.black });
     board[2][5] = createPieceModel.rook({ side: SIDE.white });
-    board[3][4] = createPieceModel.pawn({ side: SIDE.white });
+    board[4][3] = createPieceModel.pawn({ side: SIDE.white });
+    board[0][2] = createPieceModel.king({ side: SIDE.white });
     boardModel = createBoardModel({ board : board, side: side });
     boardModel.subscribe("board", function (data) {
         boardData = data;
@@ -111,5 +112,16 @@ test("makeMove - fail - moves into check", function () {
     deepEqual(boardData, startingBoard(), "board unchanged");
 });
 
+test("makeMove - fail - move king into check", function () {
+    setupCheckTests(SIDE.black);
+    ok(!boardModel.makeMove({ x: 2, y: 2 }, { x: 2, y: 3 }));
+    deepEqual(boardData, startingBoard(), "board unchanged");
+});
+
+test("makeMove - fail - move king into check by other king", function () {
+    setupCheckTests(SIDE.white);
+    ok(!boardModel.makeMove({ x: 2, y: 0 }, { x: 2, y: 1 }));
+    deepEqual(boardData, startingBoard(), "board unchanged");
+});
 
 }());

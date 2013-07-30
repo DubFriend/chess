@@ -96,8 +96,9 @@ this.createBoardModel = function (fig) {
             setPiece(null, start, optBoard);
         },
 
-        opponentSide = function () {
-            return side() === SIDE.black ? SIDE.white : SIDE.black;
+        opponentSide = function (optSide) {
+            var testSide = optSide || side();
+            return testSide === SIDE.black ? SIDE.white : SIDE.black;
         },
 
         changeSides = function () {
@@ -116,29 +117,42 @@ this.createBoardModel = function (fig) {
             ) ? true : false;
         },
 
-        isInCheck = function (inputSide) {
-            var testSide = inputSide || side(),
-                isCheck;
+        getKingPositions = function (board) {
+            var position = {};
+            _.each(board, function (row, y) {
+                _.each(row, function (square, x) {
+                    if(square && square.type() === PIECE.king) {
+                        position[square.side()] = { x: x, y: y };
+                    }
+                });
+            });
+            return position;
+        },
 
+        isInCheck = function (testSide, testBoard) {
+            var kingPosition = getKingPositions(testBoard)[testSide];
+            var isCheck;
+            _.each(testBoard, function (row, y) {
+                _.each(row, function (square, x) {
+                    if(square && square.side() === opponentSide(testSide)) {
+                        _.each(square.getMoves({x:x,y:y}, testBoard), function (move) {
+                            if(_.isEqual(move, kingPosition)) {
+                                isCheck = true;
+                            }
+                        });
+                    }
+                });
+            });
             return isCheck;
         },
 
         isMoveIntoCheck = function (start, end) {
-            //var tempBoard = cloneBoard(board()),
-            //    piece = tempBoard[start.y][start.x],
-            //    isCheck;
-
-            //setPiece
-
-            //setPiece(piece, { x: 5, y: 3 }, tempBoard);
-            //console.log(board());
-            //console.log("\n");
-            //console.log(tempBoard);
-            //return isCheck;
-            return false;
+            var tempBoard = cloneBoard(board());
+            movePiece(start, end, tempBoard);
+            return isInCheck(side(), tempBoard);
         };
 
-    //initialize state for testing
+    //optionally initialize board state.
     if(fig.board) {
         board(fig.board);
     }
@@ -153,9 +167,9 @@ this.createBoardModel = function (fig) {
 
     that.makeMove = function (start, end) {
         if(
-            isOwnPiece(start) &&
-            canPieceMove(start, end) &&
-            !isMoveIntoCheck(start, end)
+            isOwnPiece(start)
+            && canPieceMove(start, end)
+            && !isMoveIntoCheck(start, end)
         ) {
             movePiece(start, end);
             changeSides();
