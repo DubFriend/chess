@@ -44,7 +44,6 @@ this.createBoardModel = function (fig) {
                     });
                 };
 
-
             return function () {
                 return [
                     homeRow(SIDE.black),
@@ -55,31 +54,46 @@ this.createBoardModel = function (fig) {
                 ];
             };
         }()),
-/*
+
         cloneBoard = function (board) {
             return _.map(board, function (row) {
                 return _.map(row, function (square) {
+                    var type;
                     if(square) {
-                        return createPieceModel
+                        type = _.invert(PIECE)[square.type()];
+                        return createPieceModel[type]({ side: square.side() });
+                    }
+                    else {
+                        return null;
                     }
                 });
             });
-        };
-*/
-        //gets the value from the board of the passed coordinates
-        getPiece = function (coord) {
-            return board()[coord.y][coord.x];
         },
 
-        movePiece = function (start, end) {
-            var tempBoard = board(),
-                piece = getPiece(start);
-            tempBoard[end.y][end.x] = piece;
-            tempBoard[start.y][start.x] = null;
-            if(piece.type === PIECE.king) {
-                isKingMoved[piece.side] = true;
+        //gets the value from the board of the passed coordinates
+        getPiece = function (coord, optBoard) {
+            if(optBoard) {
+                return optBoard[coord.y][coord.x];
             }
-            board(tempBoard);
+            else {
+                return board()[coord.y][coord.x];
+            }
+        },
+
+        setPiece = function (piece, coord, optBoard) {
+            if(optBoard) {
+                optBoard[coord.y][coord.x] = piece;
+            }
+            else {
+                var tempBoard = board();
+                tempBoard[coord.y][coord.x] = piece;
+                board(tempBoard);
+            }
+        },
+
+        movePiece = function (start, end, optBoard) {
+            setPiece(getPiece(start, optBoard), end, optBoard);
+            setPiece(null, start, optBoard);
         },
 
         opponentSide = function () {
@@ -102,8 +116,25 @@ this.createBoardModel = function (fig) {
             ) ? true : false;
         },
 
+        isInCheck = function (inputSide) {
+            var testSide = inputSide || side(),
+                isCheck;
+
+            return isCheck;
+        },
+
         isMoveIntoCheck = function (start, end) {
-            //todo, need clone of board.
+            //var tempBoard = cloneBoard(board()),
+            //    piece = tempBoard[start.y][start.x],
+            //    isCheck;
+
+            //setPiece
+
+            //setPiece(piece, { x: 5, y: 3 }, tempBoard);
+            //console.log(board());
+            //console.log("\n");
+            //console.log(tempBoard);
+            //return isCheck;
             return false;
         };
 

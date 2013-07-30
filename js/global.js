@@ -1,7 +1,7 @@
 //utility functions added into the underscore namespace.
 _.mixin({
     pad: function (num, val) {
-        return _.map(_.range(num), function () { return val; });
+        return this.map(this.range(num), function () { return val; });
     }
 });
 
@@ -17,8 +17,4 @@ var PIECE = {
     SIDE = {
         black: "b",
         white: "w"
-    },
-
-    GAME_STATUS = {
-        newGame: "new"
     };
