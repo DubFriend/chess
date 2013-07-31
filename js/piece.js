@@ -172,6 +172,8 @@ pieceModel.rook = function (fig) {
     var my = {},
         that = createPieceModelBase(PIECE.rook, fig, my);
 
+    that.isMoved = false;
+
     my.getMoves = function (coord) {
         return _.union(my.horizontal(coord), my.vertical(coord));
     };

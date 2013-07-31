@@ -124,4 +124,74 @@ test("makeMove - fail - move king into check by other king", function () {
     deepEqual(boardData, startingBoard(), "board unchanged");
 });
 
+var setupCastlingTests = function (extraSetup) {
+    boardModel = undefined;
+    boardData = undefined;
+    var board = tLib.blankBoard();
+    board[0][0] = createPieceModel.rook({ side: SIDE.black });
+    board[0][7] = createPieceModel.rook({ side: SIDE.black });
+    board[0][4] = createPieceModel.king({ side: SIDE.black });
+    board[7][4] = createPieceModel.king({ side: SIDE.white });
+    if (extraSetup) {
+        extraSetup(board);
+    }
+    boardModel = createBoardModel({ board : board, side: SIDE.black });
+    boardModel.subscribe("board", function (data) {
+        boardData = data;
+    });
+};
+
+test("makeMove - castle kingside", function () {
+    setupCastlingTests();
+    ok(boardModel.makeMove({ x: 4, y: 0 }, { x: 6, y: 0 }));
+    deepEqual(boardData[0][6], {side:SIDE.black,type:PIECE.king}, "king moved");
+    deepEqual(boardData[0][5], {side:SIDE.black,type:PIECE.rook}, "rook moved");
+});
+
+test("makeMove - castle queenside", function () {
+    setupCastlingTests();
+    ok(boardModel.makeMove({ x: 4, y: 0}, { x: 2, y: 0}));
+    deepEqual(boardData[0][2], {side:SIDE.black,type:PIECE.king}, "king moved");
+    deepEqual(boardData[0][3], {side:SIDE.black,type:PIECE.rook}, "rook moved");
+});
+
+test("makeMove - castling failed, not first king move", function () {
+    setupCastlingTests();
+    ok(boardModel.makeMove({ x: 4, y: 0 }, { x: 3, y: 0 }), "move king");
+    ok(boardModel.makeMove({ x: 4, y: 7 }, { x: 3, y: 7 }), "move white piece");
+    ok(boardModel.makeMove({ x: 3, y: 0 }, { x: 4, y: 0 }), "move king to start");
+    ok(boardModel.makeMove({ x: 3, y: 7 }, { x: 4, y: 7 }), "move white piece");
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
+});
+
+test("makeMove - castling failed, rook has moved", function () {
+    setupCastlingTests();
+    ok(boardModel.makeMove({ x: 0, y: 0 }, { x: 1, y: 0 }), "move rook");
+    ok(boardModel.makeMove({ x: 4, y: 7 }, { x: 3, y: 7 }), "move white piece");
+    ok(boardModel.makeMove({ x: 1, y: 0}, { x: 0, y: 0 }), "move rook to start");
+    ok(boardModel.makeMove({ x: 3, y: 7 }, { x: 4, y: 7 }), "move white piece");
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
+});
+
+test("makeMove - castling queenside failed, piece in the way", function () {
+    setupCastlingTests(function (board) {
+        board[0][1] = createPieceModel.bishop({ side: SIDE.black });
+    });
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
+});
+
+test("makeMove - castling kingside failed, piece in the way", function () {
+    setupCastlingTests(function (board) {
+        board[0][5] = createPieceModel.bishop({ side: SIDE.black });
+    });
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 6, y: 0 }), "failed castle");
+})
+
+test("makeMove - castling failed, castle into check", function () {
+    setupCastlingTests(function (board) {
+        board[2][4] = createPieceModel.bishop({ side: SIDE.white });
+    });
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
+});
+
 }());

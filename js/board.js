@@ -92,7 +92,14 @@ this.createBoardModel = function (fig) {
         },
 
         movePiece = function (start, end, optBoard) {
-            setPiece(getPiece(start, optBoard), end, optBoard);
+            var piece = getPiece(start, optBoard);
+            if(piece && (
+                piece.type() === PIECE.king ||
+                piece.type() === PIECE.rook
+            )) {
+                piece.isMoved = true;
+            }
+            setPiece(piece, end, optBoard);
             setPiece(null, start, optBoard);
         },
 
@@ -119,14 +126,22 @@ this.createBoardModel = function (fig) {
 
         getKingPositions = function (board) {
             var position = {};
-            _.each(board, function (row, y) {
-                _.each(row, function (square, x) {
-                    if(square && square.type() === PIECE.king) {
-                        position[square.side()] = { x: x, y: y };
-                    }
-                });
+            foreachSquare(board, function (piece, coord) {
+                if(piece && piece.type() === PIECE.king) {
+                    position[piece.side()] = coord;
+                }
             });
             return position;
+        },
+
+        foreachSquare = function (board, callback) {
+            var x, y, row;
+            for(y = 0; y < board.length; y += 1) {
+                row = board[y];
+                for(x = 0; x < row.length; x += 1) {
+                    callback(getPiece({ x: x, y: y }, board), { x: x, y: y });
+                }
+            }
         },
 
         isInCheck = function (testSide, testBoard) {
@@ -144,6 +159,64 @@ this.createBoardModel = function (fig) {
                 });
             });
             return isCheck;
+        },
+
+        isCastleMove = function (start, end) {
+
+            return ( start.x === 4 && (start.y === 0 || start.y === 7) &&
+                (end.x === 6 || end.x === 2) && (start.y === end.y) );
+        },
+
+        isRookPresentForCastle = function (end) {
+            var rookCoord = end.x === 6 ? { x: 7, y: 0 } : { x: 0, y: 0 },
+                piece = getPiece(rookCoord);
+            if(piece && piece.side() === side() && piece.type() === PIECE.rook) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+
+        isCastleIntoCheck = function (start, end) {
+            var tempBoard = cloneBoard(board());
+            movePiece(start, end, tempBoard);
+            var rookStart = end.x === 6 ? {x:7, y: end.y} :  {x: 0, y: end.y};
+            var rookEnd = end.x === 6 ? {x:5, y: end.y} : {x: 3, y: end.y};
+            movePiece(rookStart, rookEnd, tempBoard);
+            return isInCheck(side(), tempBoard);
+        },
+
+        isKingsFirstMove = function () {
+            var king = getPiece(getKingPositions(board())[side()]);
+            return !king.isMoved;
+        },
+
+        isRooksFirstMove = function (castlingCoord) {
+            var rookCoord = (castlingCoord.x === 6 ?
+                            { x: 7, y: castlingCoord.y } :
+                            { x: 0, y: castlingCoord.y }),
+                rook = getPiece(rookCoord);
+            return !rook.isMoved;
+        },
+
+        castle = function (start, end) {
+            movePiece(start, end);
+            var rookStart = end.x === 6 ? {x:7, y: end.y} :  {x: 0, y: end.y};
+            var rookEnd = end.x === 6 ? {x:5, y: end.y} : {x: 3, y: end.y};
+            movePiece(rookStart, rookEnd);
+        },
+
+        isSpaceClearForCastle = function (end) {
+            if(end.x === 6) {
+                return (getPiece({ x: 5, y: end.y }) === null
+                    && getPiece({ x: 6, y: end.y }) === null);
+            }
+            else {
+                return (getPiece({ x: 3, y: end.y }) === null
+                    && getPiece({ x: 2, y: end.y }) === null
+                    && getPiece({ x: 1, y: end.y }) === null);
+            }
         },
 
         isMoveIntoCheck = function (start, end) {
@@ -166,18 +239,43 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        if(
-            isOwnPiece(start)
-            && canPieceMove(start, end)
-            && !isMoveIntoCheck(start, end)
-        ) {
-            movePiece(start, end);
-            changeSides();
-            return true;
+        var isMoved;
+        if(isOwnPiece(start)) {
+            //console.log("is own piece");
+            if(isCastleMove(start, end)) {
+                //console.log("is castle");
+                if(
+                    isRookPresentForCastle(end)
+                    && isKingsFirstMove()
+                    && isRooksFirstMove(end)
+                    && isSpaceClearForCastle(end)
+                    && !isCastleIntoCheck(start, end)
+                ) {
+                    castle(start, end);
+                    isMoved = true;
+                }
+                else {
+                    isMoved = false;
+                }
+            }
+            //else if(isEnpassant(start, end)) {}
+            else {
+                //console.log("regular move");
+                if(canPieceMove(start, end) && !isMoveIntoCheck(start, end)) {
+                    //console.log("move piece");
+                    movePiece(start, end);
+                    changeSides();
+                    isMoved = true;
+                }
+                else {
+                    isMoved = false;
+                }
+            }
         }
         else {
-            return false;
+            isMoved = false;
         }
+        return isMoved;
     };
 
     return that;
