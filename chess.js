@@ -1,4 +1,5 @@
-// _____________________________________________________________________________
+(function () {
+;// _____________________________________________________________________________
 //
 // ---------------------------   jsMessage   -----------------------------------
 //
@@ -239,99 +240,6 @@ messaging.mixinEvents = function (object, argumentGenerators) {
 
     return object;
 };
-
-}).call(this);
-;(function () {
-"use strict";
-
-    //turn all message functionality on or off.
-var isOn = true,
-    //default details to display
-    defaults = {
-        message: true,
-        line: true,
-        stack: false
-    },
-    //map prop names to display label
-    propMap = {
-        message: "",
-        line: " - ",
-        stack: "Stack Trace : "
-    },
-    //extract filename and line number one level up the call stack
-    //(where log is being called, instead of this file).
-    extractLine = function (stack) {
-        var line;
-        if(typeof stack === "string") {
-            line = stack.split('\n')[2].split('/');
-            //get final branch of the filePath
-            line = line[line.length - 1];
-            //remove trailing ')'
-            if(line.charAt(line.length - 1) === ")") {
-                line = line.substr(0, line.length - 1);
-            }
-            return line;
-        }
-    },
-    //maps message data to a printable string format.
-    toString = function (msgObj) {
-        var prop, label, message = "\n";
-        for(prop in msgObj) {
-            if(msgObj.hasOwnProperty(prop)) {
-                label = propMap[prop] === undefined ? prop + ": " : propMap[prop];
-                message += label + msgObj[prop] + "\n";
-            }
-        }
-        return message;
-    },
-    //removes data that is not to be displayed.
-    filterMsgObj = function (msgObj, opt) {
-        var prop,
-            allowed,
-            filtered = {};
-
-        for(prop in msgObj) {
-            if(msgObj.hasOwnProperty(prop)) {
-                allowed = opt[prop] === undefined ? defaults[prop] : opt[prop];
-                if(allowed) {
-                    filtered[prop] = msgObj[prop];
-                }
-            }
-        }
-
-        return filtered;
-    },
-    //the exported function. prints message and metadata to the screen
-    //returns all data
-    log = function (message, opt) {
-        opt = opt || {};
-        var msgObj = {};
-        if(isOn || opt.force) {
-            msgObj.message = message;
-            msgObj.stack = new Error().stack;
-            setTimeout(function () {
-                msgObj.line = extractLine(msgObj.stack);
-                console.log(toString(filterMsgObj(msgObj, opt)));
-            }, 0);
-            return msgObj;
-        }
-    };
-
-//attache to the global object, or to exports (for nodejs)
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-        exports = module.exports = log;
-    }
-    exports.log = log;
-}
-else {
-    if(this.log === undefined) {
-        this.log = log;
-    }
-    else {
-        throw "debug is allready defined";
-    }
-}
 
 }).call(this);
 ;/*!
@@ -1966,7 +1874,9 @@ window.ChessBoard.objToFen = objToFen;
 ;//utility functions added into the underscore namespace.
 _.mixin({
     pad: function (num, val) {
-        return this.map(this.range(num), function () { return val; });
+        return this.map(this.range(num), function () {
+            return val;
+        });
     }
 });
 
@@ -1985,14 +1895,279 @@ var PIECE = {
     };
 ;(function () {
 "use strict";
+// ----------------------------- Piece Models ----------------------------------
+// Piece Models understand how they can move in relation to the board and other
+// pieces, but are not aware of board level rules (such as moving into check).
+// Piece Models understand that other pieces are black or white, but not which
+// type (king, rook, etc.) the other pieces are.
 
-// ---------------------------- Board Model ------------------------------------
+var pieceModel = {};
+this.createPieceModel = pieceModel;
+
+var createPieceModelBase = function (type, fig, my) {
+    fig = fig || {};
+    var that = {};
+
+    that.side = function () {
+        return my.side;
+    };
+
+    that.type = function () {
+        return type;
+    };
+
+    // ! my.getMoves must be implemented by subclass.
+    that.getMoves = function (coord, board) {
+        my.tempBoard = board;
+        var results = my.getMoves(coord);
+        my.tempBoard = undefined;
+        return results;
+    };
+
+    //temporarily stores board state, so we dont have to pass the board around
+    //should be reset to undefined after every public method call that sets it.
+    my.tempBoard = undefined;
+
+    my.side = fig.side;
+
+    my.isOnBoard = function (coord) {
+        return coord.x >= 0 && coord.x < 8 && coord.y >= 0 && coord.y < 8;
+    };
+
+    var getSquare = function (coord) {
+        if(my.isOnBoard(coord)) {
+            return my.tempBoard[coord.y][coord.x];
+        }
+    };
+
+    //returns null | PIECE.white | PIECE.black, depending on whats on the square.
+    var sideOnSquare = function (coord) {
+        var square = getSquare(coord);
+        return square && square.side();
+    };
+
+    my.isOpponent = function (coord) {
+        var a = sideOnSquare(coord),
+            b = that.side();
+        return (a === SIDE.white && b === SIDE.black ||
+                a === SIDE.black && b === SIDE.white);
+    };
+
+    my.isAlly = function (coord) {
+        return sideOnSquare(coord) === that.side();
+    };
+
+    var line = function (coord, advanceA, advanceB) {
+        var a = advanceA(coord),
+            b = advanceB(coord),
+            isBlockedA = createIsProgressBlocked(),
+            isBlockedB = createIsProgressBlocked(),
+            moves = [];
+        while(my.isOnBoard(a) && !isBlockedA(a)) {
+            moves.push(a);
+            a = advanceA(a);
+        }
+        while(my.isOnBoard(b) && !isBlockedB(b)) {
+            moves.push(b);
+            b = advanceB(b);
+        }
+        return moves;
+    };
+
+    var createIsProgressBlocked = function () {
+        var stopProgress = false;
+        return function (coord) {
+            var isBlocked = false;
+            if(stopProgress) {
+                isBlocked = true;
+            }
+            else if(my.isAlly(coord)) {
+                isBlocked = true;
+            }
+            else if(my.isOpponent(coord)) {
+                stopProgress = true;
+            }
+            return isBlocked;
+        };
+    };
+
+    my.advance = function (dx, dy, coord) {
+        return { x: coord.x + dx, y: coord.y + dy };
+    };
+
+    var advance = function (dx, dy) {
+        return _.partial(my.advance, dx, dy);
+    };
+
+    my.horizontal = function (coord) {
+        return line(coord, advance(-1, 0), advance(1, 0));
+    };
+
+    my.vertical = function (coord) {
+        return line(coord, advance(0, 1), advance(0, -1));
+    };
+
+    my.rising = function (coord) {
+        return line(coord, advance(1, -1), advance(-1, 1));
+    };
+
+    my.falling = function (coord) {
+        return line(coord, advance(1, 1), advance(-1, -1));
+    };
+
+    return that;
+};
+
+
+pieceModel.king = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.king, fig, my);
+
+    that.isMoved = false;
+
+    my.getMoves = function (coord) {
+        return _.filter(
+            _.map(
+                [[1,1],[1,0],[1,-1],[0,1],[0,-1],[-1,1],[-1,0],[-1,-1]],
+                function (move) {
+                    return my.advance(move[0], move[1], coord);
+                }
+            ),
+            function (move) {
+                return my.isOnBoard(move) && !my.isAlly(move);
+            }
+        );
+    };
+
+    return that;
+};
+
+
+pieceModel.queen = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.queen, fig, my);
+
+    my.getMoves = function (coord) {
+        return _.union(
+            my.horizontal(coord),
+            my.vertical(coord),
+            my.rising(coord),
+            my.falling(coord)
+        );
+    };
+
+    return that;
+};
+
+
+pieceModel.rook = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.rook, fig, my);
+
+    that.isMoved = false;
+
+    my.getMoves = function (coord) {
+        return _.union(my.horizontal(coord), my.vertical(coord));
+    };
+
+    return that;
+};
+
+
+pieceModel.bishop = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.bishop, fig, my);
+
+    my.getMoves = function (coord) {
+        return _.union(my.rising(coord), my.falling(coord));
+    };
+
+    return that;
+};
+
+
+pieceModel.knight = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.knight, fig, my);
+
+    my.getMoves = function (coord) {
+        return _.filter(
+            _.map(
+                [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]],
+                function (move) {
+                    return my.advance(move[0], move[1], coord);
+                }
+            ),
+            function (coord) {
+                return my.isOnBoard(coord) && !my.isAlly(coord);
+            }
+        );
+    };
+
+    return that;
+};
+
+
+pieceModel.pawn = function (fig) {
+    fig = fig || {};
+    var my = {},
+        that = createPieceModelBase(PIECE.pawn, fig, my),
+
+        movesRaw = function (coord) {
+            var moves = [], forward, homeRow;
+
+            if(that.side() === SIDE.black) {
+                forward = 1;
+                homeRow = 1;
+            }
+            else {
+                forward = -1;
+                homeRow = 6;
+            }
+
+            moves.push({ x: coord.x, y: coord.y + forward });
+            if(coord.y === homeRow) {
+                moves.push({ x: coord.x, y: coord.y + forward * 2 });
+            }
+
+            return _.filter(moves, function (coord) {
+                return ( my.isOnBoard(coord) &&
+                        !my.isOpponent(coord) &&
+                        !my.isAlly(coord) );
+            });
+        },
+
+        attackMoves = function (coord) {
+            var forward = that.side() === SIDE.black ? 1 : -1;
+            return _.filter(
+                [{ x: coord.x + 1, y: coord.y + forward },
+                 { x: coord.x - 1, y: coord.y + forward }],
+                my.isOpponent
+            );
+        };
+
+    my.getMoves = function (coord) {
+        return _.union(movesRaw(coord), attackMoves(coord));
+    };
+
+    that.isEnPassant = false;
+
+    return that;
+};
+
+}).call(this);
+;// ---------------------------- Board Model ------------------------------------
 // The board Model takes care of managing the state of the board, and handling,
 // board level rules such as castling, moving into check, and en passant.  The
 // Board Model should try to remain unaware of the types that each piece is (let
 // the Piece Models handle piece specific Logic).
-
-this.createBoardModel = function (fig) {
+createBoardModel = function (fig) {
+    "use strict";
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
 
@@ -2055,7 +2230,6 @@ this.createBoardModel = function (fig) {
             });
         },
 
-        //gets the value from the board of the passed coordinates
         getPiece = function (coord, optBoard) {
             if(optBoard) {
                 return optBoard[coord.y][coord.x];
@@ -2076,8 +2250,24 @@ this.createBoardModel = function (fig) {
             }
         },
 
+        resetEnPassant = function (board) {
+            foreachSquare(board, function (piece, coord) {
+                if(piece && piece.type() === PIECE.pawn) {
+                    piece.isEnPassant = false;
+                }
+            });
+        },
+
         movePiece = function (start, end, optBoard) {
-            setPiece(getPiece(start, optBoard), end, optBoard);
+            var piece = getPiece(start, optBoard);
+            resetEnPassant(optBoard || board());
+            if(piece && (
+                piece.type() === PIECE.king ||
+                piece.type() === PIECE.rook
+            )) {
+                piece.isMoved = true;
+            }
+            setPiece(piece, end, optBoard);
             setPiece(null, start, optBoard);
         },
 
@@ -2104,37 +2294,107 @@ this.createBoardModel = function (fig) {
 
         getKingPositions = function (board) {
             var position = {};
-            _.each(board, function (row, y) {
-                _.each(row, function (square, x) {
-                    if(square && square.type() === PIECE.king) {
-                        position[square.side()] = { x: x, y: y };
-                    }
-                });
+            foreachSquare(board, function (piece, coord) {
+                if(piece && piece.type() === PIECE.king) {
+                    position[piece.side()] = coord;
+                }
             });
             return position;
         },
 
-        isInCheck = function (testSide, testBoard) {
-            var kingPosition = getKingPositions(testBoard)[testSide];
-            var isCheck;
-            _.each(testBoard, function (row, y) {
-                _.each(row, function (square, x) {
-                    if(square && square.side() === opponentSide(testSide)) {
-                        _.each(square.getMoves({x:x,y:y}, testBoard), function (move) {
-                            if(_.isEqual(move, kingPosition)) {
-                                isCheck = true;
-                            }
-                        });
-                    }
-                });
+        foreachSquare = function (board, callback) {
+            var x, y, row;
+            for(y = 0; y < board.length; y += 1) {
+                row = board[y];
+                for(x = 0; x < row.length; x += 1) {
+                    callback(getPiece({ x: x, y: y }, board), { x: x, y: y });
+                }
+            }
+        },
+
+        isInCheck = function (testBoard) {
+            var kingPosition = getKingPositions(testBoard)[side()],
+                isCheck = false;
+
+            foreachSquare(testBoard, function (piece, coord) {
+                if(piece && piece.side() === opponentSide(side())) {
+                    _.each(piece.getMoves(coord, testBoard), function (move) {
+                        if(_.isEqual(move, kingPosition)) {
+                            isCheck = true;
+                        }
+                    });
+                }
             });
+
             return isCheck;
+        },
+
+        isCastleMove = function (start, end) {
+            return ( start.x === 4 && (start.y === 0 || start.y === 7) &&
+                (end.x === 6 || end.x === 2) && (start.y === end.y) );
+        },
+
+        getRookCastleStartCoord = function (end) {
+            return end.x === 6 ? { x: 7, y: end.y } : { x: 0, y: end.y };
+        },
+
+        getRookCastleEndCoord = function (end) {
+            return end.x === 6 ? { x: 5, y: end.y } : { x: 3, y: end.y };
+        },
+
+        isRookPresentForCastle = function (end) {
+            var rookCoord = getRookCastleStartCoord(end),
+                piece = getPiece(rookCoord);
+
+            return piece && piece.side() === side() && piece.type() === PIECE.rook;
+        },
+
+        isCastleIntoCheck = function (start, end) {
+            var tempBoard = cloneBoard(board());
+            movePiece(start, end, tempBoard);
+            movePiece(
+                getRookCastleStartCoord(end),
+                getRookCastleEndCoord(end),
+                tempBoard
+            );
+            return isInCheck(tempBoard);
+        },
+
+        isKingsFirstMove = function () {
+            var king = getPiece(getKingPositions(board())[side()]);
+            return !king.isMoved;
+        },
+
+        isRooksFirstMove = function (castlingCoord) {
+            var rook = getPiece(getRookCastleStartCoord(castlingCoord));
+            return rook && rook.type() === PIECE.rook && !rook.isMoved;
+        },
+
+        castle = function (start, end) {
+            movePiece(start, end);
+            movePiece(getRookCastleStartCoord(end), getRookCastleEndCoord(end));
+        },
+
+        isSpaceClearForCastle = function (end) {
+            if(end.x === 6) {
+                return ( getPiece({ x: 5, y: end.y }) === null &&
+                         getPiece({ x: 6, y: end.y }) === null );
+            }
+            else {
+                return ( getPiece({ x: 3, y: end.y }) === null &&
+                         getPiece({ x: 2, y: end.y }) === null &&
+                         getPiece({ x: 1, y: end.y }) === null );
+            }
         },
 
         isMoveIntoCheck = function (start, end) {
             var tempBoard = cloneBoard(board());
             movePiece(start, end, tempBoard);
-            return isInCheck(side(), tempBoard);
+            return isInCheck(tempBoard);
+        },
+
+        isEnPassantMove = function (start, end) {
+            return false;
         };
 
     //optionally initialize board state.
@@ -2151,27 +2411,49 @@ this.createBoardModel = function (fig) {
     };
 
     that.makeMove = function (start, end) {
-        if(
-            isOwnPiece(start)
-            && canPieceMove(start, end)
-            && !isMoveIntoCheck(start, end)
-        ) {
-            movePiece(start, end);
-            changeSides();
-            return true;
+        var isMoved;
+        if(isOwnPiece(start)) {
+            if(isCastleMove(start, end)) {
+                if(
+                    isRookPresentForCastle(end) &&
+                    isKingsFirstMove() &&
+                    isRooksFirstMove(end) &&
+                    isSpaceClearForCastle(end) &&
+                    !isCastleIntoCheck(start, end)
+                ) {
+                    castle(start, end);
+                    isMoved = true;
+                }
+                else {
+                    isMoved = false;
+                }
+            }
+            else if(isEnPassantMove(start, end)) {
+
+            }
+            else {
+                if(canPieceMove(start, end) && !isMoveIntoCheck(start, end)) {
+                    movePiece(start, end);
+                    changeSides();
+                    isMoved = true;
+                }
+                else {
+                    isMoved = false;
+                }
+            }
         }
         else {
-            return false;
+            isMoved = false;
         }
+        return isMoved;
     };
 
     return that;
 };
-
-}).call(this);
 ;$(document).ready(function () {
 'use strict';
 
 var boardView = new ChessBoard('board', 'start');
 
-});//end document ready
+});
+;}());

@@ -7,10 +7,6 @@ html, body {
     margin: 0;
 }
 
-canvas {
-    background-color: gray;
-}
-
 .wrap {
     margin: 2em;
 }

@@ -87,8 +87,17 @@ createBoardModel = function (fig) {
             }
         },
 
+        resetEnPassant = function (board) {
+            foreachSquare(board, function (piece, coord) {
+                if(piece && piece.type() === PIECE.pawn) {
+                    piece.isEnPassant = false;
+                }
+            });
+        },
+
         movePiece = function (start, end, optBoard) {
             var piece = getPiece(start, optBoard);
+            resetEnPassant(optBoard || board());
             if(piece && (
                 piece.type() === PIECE.king ||
                 piece.type() === PIECE.rook
@@ -167,7 +176,7 @@ createBoardModel = function (fig) {
         },
 
         getRookCastleEndCoord = function (end) {
-            return end.x === 6 ? { x: 5, y: end.y } : { x: 3, y: end.y }
+            return end.x === 6 ? { x: 5, y: end.y } : { x: 3, y: end.y };
         },
 
         isRookPresentForCastle = function (end) {
@@ -205,13 +214,13 @@ createBoardModel = function (fig) {
 
         isSpaceClearForCastle = function (end) {
             if(end.x === 6) {
-                return (getPiece({ x: 5, y: end.y }) === null
-                    && getPiece({ x: 6, y: end.y }) === null);
+                return ( getPiece({ x: 5, y: end.y }) === null &&
+                         getPiece({ x: 6, y: end.y }) === null );
             }
             else {
-                return (getPiece({ x: 3, y: end.y }) === null
-                    && getPiece({ x: 2, y: end.y }) === null
-                    && getPiece({ x: 1, y: end.y }) === null);
+                return ( getPiece({ x: 3, y: end.y }) === null &&
+                         getPiece({ x: 2, y: end.y }) === null &&
+                         getPiece({ x: 1, y: end.y }) === null );
             }
         },
 
@@ -243,11 +252,11 @@ createBoardModel = function (fig) {
         if(isOwnPiece(start)) {
             if(isCastleMove(start, end)) {
                 if(
-                    isRookPresentForCastle(end)
-                    && isKingsFirstMove()
-                    && isRooksFirstMove(end)
-                    && isSpaceClearForCastle(end)
-                    && !isCastleIntoCheck(start, end)
+                    isRookPresentForCastle(end) &&
+                    isKingsFirstMove() &&
+                    isRooksFirstMove(end) &&
+                    isSpaceClearForCastle(end) &&
+                    !isCastleIntoCheck(start, end)
                 ) {
                     castle(start, end);
                     isMoved = true;

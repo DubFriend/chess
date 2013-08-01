@@ -260,6 +260,8 @@ pieceModel.pawn = function (fig) {
         return _.union(movesRaw(coord), attackMoves(coord));
     };
 
+    that.isEnPassant = false;
+
     return that;
 };
 

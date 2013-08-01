@@ -185,7 +185,7 @@ test("makeMove - castling kingside failed, piece in the way", function () {
         board[0][5] = createPieceModel.bishop({ side: SIDE.black });
     });
     ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 6, y: 0 }), "failed castle");
-})
+});
 
 test("makeMove - castling failed, castle into check", function () {
     setupCastlingTests(function (board) {
@@ -198,10 +198,12 @@ var setupEnPassantTests = function (extraSetup) {
     boardModel = undefined;
     boardData = undefined;
     var board = tLib.blankBoard();
-    board[0][0] = createPieceModel.rook({ side: SIDE.black });
-    board[0][7] = createPieceModel.rook({ side: SIDE.black });
-    board[0][4] = createPieceModel.king({ side: SIDE.black });
-    board[7][4] = createPieceModel.king({ side: SIDE.white });
+    board[1][1] = createPieceModel.pawn({ side: SIDE.black });
+    board[2][4] = createPieceModel.pawn({ side: SIDE.black });
+    board[3][2] = createPieceModel.pawn({ side: SIDE.white });
+    board[3][3] = createPieceModel.pawn({ side: SIDE.white });
+    board[4][5] = createPieceModel.pawn({ side: SIDE.black });
+    board[6][4] = createPieceModel.pawn({ side: SIDE.white });
     if (extraSetup) {
         extraSetup(board);
     }
@@ -210,8 +212,16 @@ var setupEnPassantTests = function (extraSetup) {
         boardData = data;
     });
 };
-
-
-//test("makeMove - en passant", function () {});
+/*
+test("makeMove - en passant - white", function () {
+    setupEnPassantTests();
+    ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 3 }), "setup move");
+    ok(boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "en passant move");
+    deepEqual(boardData[3][1], null, "piece is captured");
+});
+*/
+//test("makeMove - en passant - black", function () {});
+//test("makeMove - en passant - failed - only advanced one", function () {});
+//test("makeMove - en passant - failed - missed opportunity", function () {});
 
 }());

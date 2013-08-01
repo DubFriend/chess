@@ -3,4 +3,4 @@ $(document).ready(function () {
 
 var boardView = new ChessBoard('board', 'start');
 
-});//end document ready
+});
