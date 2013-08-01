@@ -1,13 +1,10 @@
-(function () {
-"use strict";
-
 // ---------------------------- Board Model ------------------------------------
 // The board Model takes care of managing the state of the board, and handling,
 // board level rules such as castling, moving into check, and en passant.  The
 // Board Model should try to remain unaware of the types that each piece is (let
 // the Piece Models handle piece specific Logic).
-
-this.createBoardModel = function (fig) {
+createBoardModel = function (fig) {
+    "use strict";
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
 
@@ -70,7 +67,6 @@ this.createBoardModel = function (fig) {
             });
         },
 
-        //gets the value from the board of the passed coordinates
         getPiece = function (coord, optBoard) {
             if(optBoard) {
                 return optBoard[coord.y][coord.x];
@@ -144,47 +140,52 @@ this.createBoardModel = function (fig) {
             }
         },
 
-        isInCheck = function (testSide, testBoard) {
-            var kingPosition = getKingPositions(testBoard)[testSide];
-            var isCheck;
-            _.each(testBoard, function (row, y) {
-                _.each(row, function (square, x) {
-                    if(square && square.side() === opponentSide(testSide)) {
-                        _.each(square.getMoves({x:x,y:y}, testBoard), function (move) {
-                            if(_.isEqual(move, kingPosition)) {
-                                isCheck = true;
-                            }
-                        });
-                    }
-                });
+        isInCheck = function (testBoard) {
+            var kingPosition = getKingPositions(testBoard)[side()],
+                isCheck = false;
+
+            foreachSquare(testBoard, function (piece, coord) {
+                if(piece && piece.side() === opponentSide(side())) {
+                    _.each(piece.getMoves(coord, testBoard), function (move) {
+                        if(_.isEqual(move, kingPosition)) {
+                            isCheck = true;
+                        }
+                    });
+                }
             });
+
             return isCheck;
         },
 
         isCastleMove = function (start, end) {
-
             return ( start.x === 4 && (start.y === 0 || start.y === 7) &&
                 (end.x === 6 || end.x === 2) && (start.y === end.y) );
         },
 
+        getRookCastleStartCoord = function (end) {
+            return end.x === 6 ? { x: 7, y: end.y } : { x: 0, y: end.y };
+        },
+
+        getRookCastleEndCoord = function (end) {
+            return end.x === 6 ? { x: 5, y: end.y } : { x: 3, y: end.y }
+        },
+
         isRookPresentForCastle = function (end) {
-            var rookCoord = end.x === 6 ? { x: 7, y: 0 } : { x: 0, y: 0 },
+            var rookCoord = getRookCastleStartCoord(end),
                 piece = getPiece(rookCoord);
-            if(piece && piece.side() === side() && piece.type() === PIECE.rook) {
-                return true;
-            }
-            else {
-                return false;
-            }
+
+            return piece && piece.side() === side() && piece.type() === PIECE.rook;
         },
 
         isCastleIntoCheck = function (start, end) {
             var tempBoard = cloneBoard(board());
             movePiece(start, end, tempBoard);
-            var rookStart = end.x === 6 ? {x:7, y: end.y} :  {x: 0, y: end.y};
-            var rookEnd = end.x === 6 ? {x:5, y: end.y} : {x: 3, y: end.y};
-            movePiece(rookStart, rookEnd, tempBoard);
-            return isInCheck(side(), tempBoard);
+            movePiece(
+                getRookCastleStartCoord(end),
+                getRookCastleEndCoord(end),
+                tempBoard
+            );
+            return isInCheck(tempBoard);
         },
 
         isKingsFirstMove = function () {
@@ -193,18 +194,13 @@ this.createBoardModel = function (fig) {
         },
 
         isRooksFirstMove = function (castlingCoord) {
-            var rookCoord = (castlingCoord.x === 6 ?
-                            { x: 7, y: castlingCoord.y } :
-                            { x: 0, y: castlingCoord.y }),
-                rook = getPiece(rookCoord);
-            return !rook.isMoved;
+            var rook = getPiece(getRookCastleStartCoord(castlingCoord));
+            return rook && rook.type() === PIECE.rook && !rook.isMoved;
         },
 
         castle = function (start, end) {
             movePiece(start, end);
-            var rookStart = end.x === 6 ? {x:7, y: end.y} :  {x: 0, y: end.y};
-            var rookEnd = end.x === 6 ? {x:5, y: end.y} : {x: 3, y: end.y};
-            movePiece(rookStart, rookEnd);
+            movePiece(getRookCastleStartCoord(end), getRookCastleEndCoord(end));
         },
 
         isSpaceClearForCastle = function (end) {
@@ -222,7 +218,11 @@ this.createBoardModel = function (fig) {
         isMoveIntoCheck = function (start, end) {
             var tempBoard = cloneBoard(board());
             movePiece(start, end, tempBoard);
-            return isInCheck(side(), tempBoard);
+            return isInCheck(tempBoard);
+        },
+
+        isEnPassantMove = function (start, end) {
+            return false;
         };
 
     //optionally initialize board state.
@@ -241,9 +241,7 @@ this.createBoardModel = function (fig) {
     that.makeMove = function (start, end) {
         var isMoved;
         if(isOwnPiece(start)) {
-            //console.log("is own piece");
             if(isCastleMove(start, end)) {
-                //console.log("is castle");
                 if(
                     isRookPresentForCastle(end)
                     && isKingsFirstMove()
@@ -258,11 +256,11 @@ this.createBoardModel = function (fig) {
                     isMoved = false;
                 }
             }
-            //else if(isEnpassant(start, end)) {}
+            else if(isEnPassantMove(start, end)) {
+
+            }
             else {
-                //console.log("regular move");
                 if(canPieceMove(start, end) && !isMoveIntoCheck(start, end)) {
-                    //console.log("move piece");
                     movePiece(start, end);
                     changeSides();
                     isMoved = true;
@@ -280,5 +278,3 @@ this.createBoardModel = function (fig) {
 
     return that;
 };
-
-}).call(this);

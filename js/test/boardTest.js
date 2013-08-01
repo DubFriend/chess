@@ -194,4 +194,24 @@ test("makeMove - castling failed, castle into check", function () {
     ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
 });
 
+var setupEnPassantTests = function (extraSetup) {
+    boardModel = undefined;
+    boardData = undefined;
+    var board = tLib.blankBoard();
+    board[0][0] = createPieceModel.rook({ side: SIDE.black });
+    board[0][7] = createPieceModel.rook({ side: SIDE.black });
+    board[0][4] = createPieceModel.king({ side: SIDE.black });
+    board[7][4] = createPieceModel.king({ side: SIDE.white });
+    if (extraSetup) {
+        extraSetup(board);
+    }
+    boardModel = createBoardModel({ board : board, side: SIDE.black });
+    boardModel.subscribe("board", function (data) {
+        boardData = data;
+    });
+};
+
+
+//test("makeMove - en passant", function () {});
+
 }());

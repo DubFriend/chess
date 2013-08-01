@@ -1,7 +1,9 @@
 //utility functions added into the underscore namespace.
 _.mixin({
     pad: function (num, val) {
-        return this.map(this.range(num), function () { return val; });
+        return this.map(this.range(num), function () {
+            return val;
+        });
     }
 });
 
