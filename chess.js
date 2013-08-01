@@ -2261,11 +2261,16 @@ createBoardModel = function (fig) {
         movePiece = function (start, end, optBoard) {
             var piece = getPiece(start, optBoard);
             resetEnPassant(optBoard || board());
-            if(piece && (
-                piece.type() === PIECE.king ||
-                piece.type() === PIECE.rook
-            )) {
-                piece.isMoved = true;
+            if(piece) {
+                if(piece.type() === PIECE.king || piece.type() === PIECE.rook) {
+                    piece.isMoved = true;
+                }
+                else if(
+                    piece.type() === PIECE.pawn &&
+                    Math.abs(start.y - end.y) === 2
+                ) {
+                    piece.isEnPassant = true;
+                }
             }
             setPiece(piece, end, optBoard);
             setPiece(null, start, optBoard);
@@ -2315,7 +2320,6 @@ createBoardModel = function (fig) {
         isInCheck = function (testBoard) {
             var kingPosition = getKingPositions(testBoard)[side()],
                 isCheck = false;
-
             foreachSquare(testBoard, function (piece, coord) {
                 if(piece && piece.side() === opponentSide(side())) {
                     _.each(piece.getMoves(coord, testBoard), function (move) {
@@ -2325,13 +2329,12 @@ createBoardModel = function (fig) {
                     });
                 }
             });
-
             return isCheck;
         },
 
         isCastleMove = function (start, end) {
             return ( start.x === 4 && (start.y === 0 || start.y === 7) &&
-                (end.x === 6 || end.x === 2) && (start.y === end.y) );
+                    (end.x === 6 || end.x === 2) && (start.y === end.y) );
         },
 
         getRookCastleStartCoord = function (end) {
@@ -2394,7 +2397,28 @@ createBoardModel = function (fig) {
         },
 
         isEnPassantMove = function (start, end) {
-            return false;
+            var piece = getPiece(start),
+                opponent = getPiece({ x: end.x, y: start.y });
+            if(
+                piece &&
+                piece.type() === PIECE.pawn &&
+                Math.abs(start.x - end.x) === 1 &&
+                Math.abs(start.y - end.y) === 1 &&
+                getPiece(end) === null &&
+                opponent.type() === PIECE.pawn &&
+                opponent.side() === opponentSide() &&
+                opponent.isEnPassant
+            ) {
+                if(side() === SIDE.white) {
+                    return start.y - end.y > 0;
+                }
+                else {
+                    return start.y - end.y < 0;
+                }
+            }
+            else {
+                return false;
+            }
         };
 
     //optionally initialize board state.
@@ -2429,7 +2453,9 @@ createBoardModel = function (fig) {
                 }
             }
             else if(isEnPassantMove(start, end)) {
-
+                setPiece(null, { x: end.x, y: start.y });
+                movePiece(start, end);
+                isMoved = true;
             }
             else {
                 if(canPieceMove(start, end) && !isMoveIntoCheck(start, end)) {

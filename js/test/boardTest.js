@@ -212,16 +212,34 @@ var setupEnPassantTests = function (extraSetup) {
         boardData = data;
     });
 };
-/*
+
 test("makeMove - en passant - white", function () {
     setupEnPassantTests();
     ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 3 }), "setup move");
     ok(boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "en passant move");
     deepEqual(boardData[3][1], null, "piece is captured");
 });
-*/
-//test("makeMove - en passant - black", function () {});
-//test("makeMove - en passant - failed - only advanced one", function () {});
-//test("makeMove - en passant - failed - missed opportunity", function () {});
+
+test("makeMove - en passant - black", function () {
+    setupEnPassantTests();
+    ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 2 }), "change sides to white");
+    ok(boardModel.makeMove({ x: 4, y: 6 }, { x: 4, y: 4 }), "setup move");
+    ok(boardModel.makeMove({ x: 5, y: 4 }, { x: 4, y: 5 }), "en passant move");
+    deepEqual(boardData[4][4], null, "piece is captured");
+});
+
+test("makeMove - en passant - failed - only advanced one", function () {
+    setupEnPassantTests();
+    ok(boardModel.makeMove({ x: 4, y: 2 }, { x: 4, y: 3}), "setup, only move one square");
+    ok(!boardModel.makeMove({ x: 3, y: 3 }, { x: 4, y: 2 }), "failed en passant attempt");
+});
+
+test("makeMove - en passant - failed - missed opportunity", function () {
+    setupEnPassantTests();
+    ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 3 }), "setup");
+    ok(boardModel.makeMove({ x: 3, y: 3 }, { x: 3, y: 2 }), "miss en passant opportunity");
+    ok(boardModel.makeMove({ x: 4, y: 2 }, { x: 4, y: 3 }), "switch sides");
+    ok(!boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "failed en passant attempt");
+});
 
 }());
