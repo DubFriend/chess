@@ -20,6 +20,8 @@ createBoardModel = function (fig) {
 
         side = that.autoPublish("side"),
 
+        awaitingPawnPromotion = false,
+
         setupNewGameBoard = (function () {
             var homeRow = function (side) {
                     return _.map(
@@ -256,6 +258,18 @@ createBoardModel = function (fig) {
             else {
                 return false;
             }
+        },
+
+        isPawnPromotion = function (start, end) {
+            var piece = getPiece(start);
+            return (
+                piece &&
+                piece.type() === PIECE.pawn && (
+                    (piece.side() === SIDE.white && start.y === 1 && end.y === 0) ||
+                    (piece.side() === SIDE.black && start.y === 6 && end.y === 7)
+                ) &&
+                start.x === end.x
+            );
         };
 
     //optionally initialize board state.
@@ -271,9 +285,24 @@ createBoardModel = function (fig) {
         side(SIDE.white);
     };
 
+    that.promotePawn = function (coord, newType) {
+        var piece = getPiece(coord),
+            promoteType = _.invert(PIECE)[newType];
+
+        if(
+            piece &&
+            piece.type() === PIECE.pawn &&
+            (coord.y === 0 || coord.y === 7)
+        ) {
+            awaitingPawnPromotion = false;
+            setPiece(createPieceModel[promoteType]({ side: side() }), coord);
+            changeSides();
+        }
+    };
+
     that.makeMove = function (start, end) {
         var isMoved;
-        if(isOwnPiece(start)) {
+        if(isOwnPiece(start) && !awaitingPawnPromotion) {
             if(isCastleMove(start, end)) {
                 if(
                     isRookPresentForCastle(end) &&
@@ -289,10 +318,16 @@ createBoardModel = function (fig) {
                     isMoved = false;
                 }
             }
-            else if(isEnPassantMove(start, end)) {
+            else if(isEnPassantMove(start, end) && !isMoveIntoCheck(start, end)) {
                 setPiece(null, { x: end.x, y: start.y });
                 movePiece(start, end);
                 isMoved = true;
+            }
+            else if(isPawnPromotion(start, end) && !isMoveIntoCheck(start,end)) {
+                movePiece(start, end);
+                awaitingPawnPromotion = true;
+                isMoved = true;
+                that.publish("pawnPromotion", side());
             }
             else {
                 if(canPieceMove(start, end) && !isMoveIntoCheck(start, end)) {

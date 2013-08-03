@@ -7,6 +7,17 @@ html, body {
     margin: 0;
 }
 
-.wrap {
-    margin: 2em;
+#controls {
+    margin: 0.5em;
 }
+
+#controls form {
+    margin: 0 0 1em 0;
+}
+
+.horizontal-controls {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+

@@ -7,10 +7,8 @@ module.exports = function (grunt) {
             options: {
                 ignores: [
                     'js/chessboard-0.1.0.js',
-                    'js/lib/underscore.js',
-                    'js/lib/jquery-2.0.3.js',
+                    'js/lib/*.js',
                     'js/test/qunit-1.12.0.js',
-                    'js/lib/jsmessage.js',
                     'js/intro.js',
                     'js/outro.js'
                 ]
@@ -19,16 +17,19 @@ module.exports = function (grunt) {
 
         concat: {
             options: {
-                separator: ';'
+                separator: '\n'
             },
             dist: {
                 src: [
+                    'js/lib/underscore.js',
+                    'js/lib/mustache.js',
                     'js/intro.js',
                     'js/lib/jsmessage.js',
                     'js/chessboard-0.1.0.js',
                     'js/global.js',
                     'js/piece.js',
                     'js/board.js',
+                    'js/controller.js',
                     'js/execute.js',
                     'js/outro.js'
                 ],

@@ -242,4 +242,35 @@ test("makeMove - en passant - failed - missed opportunity", function () {
     ok(!boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "failed en passant attempt");
 });
 
+var pawnPromotionData;
+var setupPawnPromotionTests = function (extraSetup) {
+    boardModel = undefined;
+    boardData = undefined;
+    var board = tLib.blankBoard();
+    board[1][0] = createPieceModel.pawn({ side: SIDE.white });
+    if(extraSetup) {
+        extraSetup(board);
+    }
+    boardModel = createBoardModel({ board : board, side: SIDE.white });
+    boardModel.subscribe("board", function (data) {
+        boardData = data;
+    });
+    boardModel.subscribe("side", function (side) {
+        sideData = side;
+    });
+    boardModel.subscribe("pawnPromotion", function (data) {
+        pawnPromotionData = data;
+    });
+};
+
+test("promote pawn", function () {
+    setupPawnPromotionTests();
+    ok(boardModel.makeMove({ x: 0, y: 1 }, { x: 0, y: 0 }));
+    deepEqual(sideData, SIDE.white, "side still white (requires promotion choice)");
+    deepEqual(pawnPromotionData, SIDE.white, "published pawn promotion event");
+    boardModel.promotePawn({ x: 0, y: 0 }, PIECE.bishop);
+    deepEqual(boardData[0][0], { type: PIECE.bishop, side: SIDE.white }, "board changed");
+    deepEqual(sideData, SIDE.black, "changed sides after pawn promotion");
+});
+
 }());

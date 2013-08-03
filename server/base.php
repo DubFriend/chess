@@ -79,27 +79,39 @@ abstract class View {
 
 class Index_View extends View {
     protected function template() {
-        return '' .
-        '<!DOCTYPE html>' .
-        '<html lang="en">' .
-        '<head>' .
-            '<meta charset="utf-8">' .
-            '<title>{{title}}</title>' .
-            '<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">' .
-            '<link rel="icon" href="favicon.ico" type="image/x-icon">' .
-            '{{#css}}' .
-                '<link href="{{.}}" rel="stylesheet">' .
-            '{{/css}}' .
-        '</head>' .
-        '<body>' .
-            '<div class="wrap">' .
-                '<div id="board" style="width: 500px"></div>' .
-                '{{#js}}' .
-                    '<script src="{{.}}"></script>' .
-                '{{/js}}' .
-            '</div>' .
-        '</body>' .
-        '</html>';
+        return '
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <title>{{title}}</title>
+            <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+            <link rel="icon" href="favicon.ico" type="image/x-icon">
+            {{#css}}
+                <link href="{{.}}" rel="stylesheet">
+            {{/css}}
+        </head>
+        <body>
+            <div id="board"></div>
+            <div id="controls">
+                <form>
+                    <button id="new-game" class="btn btn-primary">
+                        New Game
+                    </button>
+                </form>
+                <form class="form-inline">
+                    <input id="game-id" type="text" class="form-control"
+                        placeholder="Game Id" style="width:95px;">
+                    <button id="load-game" class="btn btn-default">
+                        Load Game
+                    </button>
+                </form>
+            </div>
+            {{#js}}
+                <script src="{{.}}"></script>
+            {{/js}}
+        </body>
+        </html>';
     }
 }
 
@@ -126,9 +138,9 @@ class Index_Controller extends Controller {
             return array(
                 $libPath . "jquery-2.0.3.js",
                 $libPath . "underscore.js",
-                //$libPath . "mustache.js",
+                $libPath . "bootstrap.js",
+                $libPath . "mustache.js",
                 $libPath . "jsmessage.js",
-                $libPath . "log.js",
                 $path . $chess . ".js",
                 $path . "global.js",
                 $path . "board.js",
@@ -154,7 +166,8 @@ class Index_Controller extends Controller {
             "title" => "Chess",
             "css" => array(
                 "css/style.css",
-                "css/" . $chess . ".css"
+                "css/" . $chess . ".css",
+                "css/bootstrap.css"
             ),
             "js" => $this->getJs()
         );
