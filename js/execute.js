@@ -1,5 +1,5 @@
 $(document).ready(function () {
-'use strict';
+//'use strict';
 
 
 
@@ -25,7 +25,7 @@ var boardConfig = {
     }
 };
 
-var boardView = new ChessBoard('board', boardConfig);
+boardView = new ChessBoard('board', boardConfig);
 
 var setLayout = function () {
     var $board = $('#board');

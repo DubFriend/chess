@@ -101,7 +101,7 @@ class Index_View extends View {
                 </form>
                 <form class="form-inline">
                     <input id="game-id" type="text" class="form-control"
-                        placeholder="Game Id" style="width:95px;">
+                        placeholder="Game Id" style="width:96px;">
                     <button id="load-game" class="btn btn-default">
                         Load Game
                     </button>
