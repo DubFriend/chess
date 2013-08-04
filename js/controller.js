@@ -5,7 +5,7 @@ var createController = function (fig) {
     var that = jsMessage.mixinPubSub(),
 
         model = fig.model || createBoardModel(),
-        view = fig.view || new ChessBoard(),
+        view = fig.view || new ChessBoard('board'),
 
         selectedSquare = null,
 
@@ -72,22 +72,19 @@ var createController = function (fig) {
         view.position(boardToView(modelBoard));
     };
 
-    that.clickSquare = function (viewCoord) {//, viewPiece) {
+    that.clickSquare = function (viewCoord) {
         var modelCoord = coordToModel(viewCoord);
+
         if(selectedSquare) {
             model.makeMove(selectedSquare, modelCoord);
             selectedSquare = null;
         }
         else {
+            console.log(modelCoord);
             selectedSquare = modelCoord;
         }
-    };
 
-    that.dropPiece = function (viewStart, viewEnd) {//, viewPiece) {
-        if(viewStart !== viewEnd) {
-            model.makeMove(coordToModel(viewStart), coordToModel(viewEnd));
-            selectedSquare = null;
-        }
+        return selectedSquare ? true : false;
     };
 
     return that;

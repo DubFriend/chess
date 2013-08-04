@@ -53,30 +53,6 @@ test("click to move", function () {
     );
 });
 
-test("drop to move", function () {
-    controller.clickSquare("e2");
-    controller.dropPiece("e2", "f3");
-    deepEqual(
-        mockModel.makeMoveData,
-        {
-            start: { x: 4, y: 6 },
-            end: { x: 5, y: 5 }
-        },
-        "moved on drop"
-    );
-
-    controller.clickSquare("a2");
-    controller.clickSquare("a1");
-    deepEqual(
-        mockModel.makeMoveData,
-        {
-            start: { x: 0, y: 6 },
-            end: { x: 0, y: 7 }
-        },
-        "multiple moves ok"
-    );
-});
-
 test("boardUpdate", function () {
     var eachPiece = function (side) {
             return _.values(_.map(PIECE, function (type) {

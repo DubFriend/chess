@@ -1454,6 +1454,7 @@ var stopDefault = function(e) {
 };
 
 var mousedownSquare = function(e) {
+
   // do nothing if we're not draggable
   if (cfg.draggable !== true) return;
 
