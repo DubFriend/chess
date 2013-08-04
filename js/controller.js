@@ -4,8 +4,8 @@ var createController = function (fig) {
 
     var that = jsMessage.mixinPubSub(),
 
-        model = fig.model || createBoardModel(),
-        view = fig.view || new ChessBoard('board'),
+        boardModel = fig.model || createBoardModel(),
+        boardView = fig.view || new ChessBoard('board'),
 
         selectedSquare = null,
 
@@ -78,7 +78,12 @@ var createController = function (fig) {
 
     //subscribes to boardModel's "board" topic, and updates the view.
     that.boardUpdate = function (modelBoard) {
-        view.position(boardToView(modelBoard));
+        boardView.position(boardToView(modelBoard));
+    };
+
+    that.promotePawn = function (side) {
+        var sideText = side === SIDE.black ? "black" : "white";
+        $('#select-piece-' + sideText).modal();
     };
 
     that.sideUpdate = function (data) {
@@ -88,7 +93,7 @@ var createController = function (fig) {
             setTimeout(function () {
                 $('#board img').fadeOut(fadeTime);
                 setTimeout(function () {
-                    view.orientation(data === SIDE.white ? "white" : "black");
+                    boardView.orientation(data === SIDE.white ? "white" : "black");
                     var $pieces = $('#board img');
                     $pieces.hide();
                     $pieces.fadeIn(fadeTime);
@@ -100,15 +105,18 @@ var createController = function (fig) {
 
     that.clickSquare = function (viewCoord) {
         var modelCoord = coordToModel(viewCoord);
-
         if(selectedSquare) {
-            model.makeMove(selectedSquare, modelCoord);
-            selectedSquare = null;
+            if(boardModel.isOwnPiece(modelCoord)) {
+                selectedSquare = modelCoord;
+            }
+            else {
+                boardModel.makeMove(selectedSquare, modelCoord);
+                selectedSquare = null;
+            }
         }
-        else {
+        else if(boardModel.isOwnPiece(modelCoord)) {
             selectedSquare = modelCoord;
         }
-
         return selectedSquare ? true : false;
     };
 

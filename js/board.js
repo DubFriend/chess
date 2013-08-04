@@ -275,13 +275,15 @@ createBoardModel = function (fig) {
 
         isPawnPromotion = function (start, end) {
             var piece = getPiece(start);
+
             return (
                 piece &&
-                piece.type() === PIECE.pawn && (
-                    (piece.side() === SIDE.white && start.y === 1 && end.y === 0) ||
-                    (piece.side() === SIDE.black && start.y === 6 && end.y === 7)
+                piece.type() === PIECE.pawn &&
+                (
+                    (piece.side() === SIDE.white && end.y === 0) ||
+                    (piece.side() === SIDE.black && end.y === 7)
                 ) &&
-                start.x === end.x
+                canPieceMove(start, end)
             );
         };
 
@@ -312,6 +314,10 @@ createBoardModel = function (fig) {
             changeSides();
             awaitingPawnPromotion = false;
         }
+    };
+
+    that.isOwnPiece = function (coord) {
+        return isOwnPiece(coord);
     };
 
     that.makeMove = function (start, end) {

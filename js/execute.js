@@ -12,10 +12,9 @@ var controller = createController({
 });
 
 model.subscribe("board", _.bind(controller.boardUpdate, controller));
-
 model.newGame();
-
 model.subscribe("side", _.bind(controller.sideUpdate, controller));
+model.subscribe("pawnPromotion", _.bind(controller.promotePawn, controller));
 
 var setLayout = function () {
     var $board = $('#board'),
@@ -46,6 +45,6 @@ $(window).resize(function () {
 
 controller.bindSquareClick();
 
-$('#myModal').modal();
+$('#select-piece-black').modal('show');
 
 });

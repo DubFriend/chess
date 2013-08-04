@@ -11,7 +11,11 @@ module("controller", {
                     end: end
                 };
             },
-            makeMoveData: null
+            makeMoveData: null,
+            isOwnPiece: function () {
+                return this.ownPieceStack.pop();
+            },
+            ownPieceStack: [false, true]
         };
 
         mockView = {
@@ -41,6 +45,7 @@ test("click to move", function () {
         },
         "moved on second click"
     );
+    mockModel.ownPieceStack = [false, true];
     controller.clickSquare("a2");
     controller.clickSquare("a1");
     deepEqual(

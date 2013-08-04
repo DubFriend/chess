@@ -304,4 +304,13 @@ test("promote pawn", function () {
     deepEqual(sideData, SIDE.black, "changed sides after pawn promotion");
 });
 
+test("promote pawn - attack into position", function () {
+    setupPawnPromotionTests(function (board) {
+        board[0][1] = createPieceModel.pawn({ side: SIDE.black });
+    });
+    ok(boardModel.makeMove({ x: 0, y: 1 }, { x: 1, y: 0 }));
+    deepEqual(sideData, SIDE.white, "side still white (requires promotion choice)");
+    deepEqual(pawnPromotionData, SIDE.white, "published pawn promotion event");
+});
+
 }());
