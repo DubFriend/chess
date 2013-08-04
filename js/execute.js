@@ -11,15 +11,11 @@ var controller = createController({
     view: view
 });
 
-model.subscribe("board", function (data) {
-    controller.boardUpdate(data);
-});
-
-model.subscribe("side", function (data) {
-    controller.sideUpdate(data);
-});
+model.subscribe("board", _.bind(controller.boardUpdate, controller));
 
 model.newGame();
+
+model.subscribe("side", _.bind(controller.sideUpdate, controller));
 
 var setLayout = function () {
     var $board = $('#board'),
@@ -49,5 +45,7 @@ $(window).resize(function () {
 });
 
 controller.bindSquareClick();
+
+$('#myModal').modal();
 
 });

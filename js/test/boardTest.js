@@ -204,6 +204,13 @@ test("makeMove - castling failed, castle into check", function () {
     ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
 });
 
+test("makeMove - castling failed, castle through check", function () {
+    setupCastlingTests(function (board) {
+        board[5][3] = createPieceModel.rook({ side: SIDE.white });
+    });
+    ok(!boardModel.makeMove({ x: 4, y: 0 }, { x: 2, y: 0 }), "failed castle");
+});
+
 var setupEnPassantTests = function (extraSetup) {
     boardModel = undefined;
     boardData = undefined;

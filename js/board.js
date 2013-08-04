@@ -202,6 +202,19 @@ createBoardModel = function (fig) {
             return isInCheck(tempBoard);
         },
 
+        isCastleThroughCheck = function (start, end) {
+            var tempBoard = cloneBoard(board());
+            movePiece(
+                start,
+                {
+                    x: end.x === 2 ? start.x - 1 : start.x + 1,
+                    y: end.y
+                },
+                tempBoard
+            );
+            return isInCheck(tempBoard);
+        },
+
         isKingsFirstMove = function () {
             var king = getPiece(getKingPositions(board())[side()]);
             return !king.isMoved;
@@ -310,7 +323,8 @@ createBoardModel = function (fig) {
                     isKingsFirstMove() &&
                     isRooksFirstMove(end) &&
                     isSpaceClearForCastle(end) &&
-                    !isCastleIntoCheck(start, end)
+                    !isCastleIntoCheck(start, end) &&
+                    !isCastleThroughCheck(start, end)
                 ) {
                     castle(start, end);
                     changeSides();

@@ -82,18 +82,19 @@ var createController = function (fig) {
     };
 
     that.sideUpdate = function (data) {
-
+        var fadeTime = 200;
+        $('#status-indicator').html(data === SIDE.white ? "White's move." : "Black's move.");
         if($('#is-change-orientation').is(":checked")) {
             setTimeout(function () {
-                $('#board img').fadeOut(500);
+                $('#board img').fadeOut(fadeTime);
                 setTimeout(function () {
                     view.orientation(data === SIDE.white ? "white" : "black");
                     var $pieces = $('#board img');
                     $pieces.hide();
-                    $pieces.fadeIn(500);
+                    $pieces.fadeIn(fadeTime);
                     that.bindSquareClick();
-                }, 500);
-            }, 300);
+                }, fadeTime);
+            }, fadeTime);
         }
     };
 

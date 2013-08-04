@@ -24,3 +24,8 @@ html, body {
 #board .selected {
     background-color: rgb(120, 195, 238);
 }
+
+#controls .well {
+    width: 96%;
+    margin-bottom: 0.5em;
+}
