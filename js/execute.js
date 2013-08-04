@@ -1,16 +1,22 @@
 $(document).ready(function () {
-//'use strict';
+'use strict';
 
-var view = new ChessBoard('board');
+var view = new ChessBoard('board', {
+    showNotation: false
+});
+
 var model = createBoardModel();
 var controller = createController({
     model: model,
     view: view
 });
 
-
 model.subscribe("board", function (data) {
     controller.boardUpdate(data);
+});
+
+model.subscribe("side", function (data) {
+    controller.sideUpdate(data);
 });
 
 model.newGame();
@@ -39,18 +45,9 @@ setLayout();
 $(window).resize(setLayout);
 $(window).resize(function () {
     view.resize(arguments);
-    bindSquareClick();
+    controller.bindSquareClick();
 });
 
-var bindSquareClick = function () {
-    $('.square-55d63').click(function () {
-        $('.square-55d63').removeClass('selected');
-        if(controller.clickSquare($(this).attr('data-square'))) {
-            $(this).addClass('selected');
-        }
-    });
-};
-
-bindSquareClick();
+controller.bindSquareClick();
 
 });

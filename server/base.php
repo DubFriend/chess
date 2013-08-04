@@ -106,6 +106,14 @@ class Index_View extends View {
                         Load Game
                     </button>
                 </form>
+                <form>
+                    <div class="checkbox">
+                        <label>
+                        <input id="is-change-orientation" type="checkbox" value="" checked>
+                        Change Orientation On Move?
+                        </label>
+                    </div>
+                </form>
             </div>
             {{#js}}
                 <script src="{{.}}"></script>

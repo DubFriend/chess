@@ -283,6 +283,7 @@ createBoardModel = function (fig) {
     that.newGame = function () {
         board(setupNewGameBoard());
         side(SIDE.white);
+        that.publish("newGame", {});
     };
 
     that.promotePawn = function (coord, newType) {
@@ -294,9 +295,9 @@ createBoardModel = function (fig) {
             piece.type() === PIECE.pawn &&
             (coord.y === 0 || coord.y === 7)
         ) {
-            awaitingPawnPromotion = false;
             setPiece(createPieceModel[promoteType]({ side: side() }), coord);
             changeSides();
+            awaitingPawnPromotion = false;
         }
     };
 

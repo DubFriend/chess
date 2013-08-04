@@ -67,9 +67,34 @@ var createController = function (fig) {
     that.newGame = function () {};
     that.loadGame = function () {};
 
+    that.bindSquareClick = function () {
+        $('.square-55d63').click(function () {
+        $('.square-55d63').removeClass('selected');
+            if(that.clickSquare($(this).attr('data-square'))) {
+                $(this).addClass('selected');
+            }
+        });
+    };
+
     //subscribes to boardModel's "board" topic, and updates the view.
     that.boardUpdate = function (modelBoard) {
         view.position(boardToView(modelBoard));
+    };
+
+    that.sideUpdate = function (data) {
+
+        if($('#is-change-orientation').is(":checked")) {
+            setTimeout(function () {
+                $('#board img').fadeOut(500);
+                setTimeout(function () {
+                    view.orientation(data === SIDE.white ? "white" : "black");
+                    var $pieces = $('#board img');
+                    $pieces.hide();
+                    $pieces.fadeIn(500);
+                    that.bindSquareClick();
+                }, 500);
+            }, 300);
+        }
     };
 
     that.clickSquare = function (viewCoord) {
@@ -80,7 +105,6 @@ var createController = function (fig) {
             selectedSquare = null;
         }
         else {
-            console.log(modelCoord);
             selectedSquare = modelCoord;
         }
 
