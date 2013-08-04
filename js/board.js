@@ -122,6 +122,33 @@ createBoardModel = function (fig) {
 
         changeSides = function () {
             side(opponentSide());
+            if(isGameOver()) {
+                that.publish("winner", opponentSide());
+            }
+        },
+
+        //if game is slow, this is a probably good place to optimize
+        isGameOver = function () {
+            var isGameOver = true,
+                tempBoard;
+
+            if(isInCheck(board())) {
+                foreachSquare(board(), function (piece, coord) {
+                    if(piece && piece.side() === side()) {
+                        _.each(piece.getMoves(coord, board()), function (moveCoord) {
+                            tempBoard = cloneBoard(board());
+                            movePiece(coord, moveCoord, tempBoard);
+                            if(!isInCheck(tempBoard)) {
+                                isGameOver = false;
+                            }
+                        });
+                    }
+                });
+                return isGameOver;
+            }
+            else {
+                return false;
+            }
         },
 
         isOwnPiece = function (coord) {
@@ -156,11 +183,13 @@ createBoardModel = function (fig) {
             }
         },
 
-        isInCheck = function (testBoard) {
-            var kingPosition = getKingPositions(testBoard)[side()],
+        isInCheck = function (testBoard, optSide) {
+            var testSide = optSide || side(),
+                kingPosition = getKingPositions(testBoard)[testSide],
                 isCheck = false;
+
             foreachSquare(testBoard, function (piece, coord) {
-                if(piece && piece.side() === opponentSide(side())) {
+                if(piece && piece.side() === opponentSide(testSide)) {
                     _.each(piece.getMoves(coord, testBoard), function (move) {
                         if(_.isEqual(move, kingPosition)) {
                             isCheck = true;

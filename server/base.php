@@ -123,6 +123,16 @@ class Index_View extends View {
                 </div>
             </div>
 
+            <div class="modal fade" id="display-winner">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title"></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <div id="board"></div>
             <div id="controls">

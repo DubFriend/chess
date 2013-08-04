@@ -100,6 +100,12 @@ var createController = function (fig) {
         boardView.position(boardToView(modelBoard));
     };
 
+    that.declareWinner = function (side) {
+        var sideText = side === SIDE.black ? "Black" : "White";
+        $('#display-winner .modal-title').html(sideText + " Wins!");
+        $('#display-winner').modal('show');
+    };
+
     that.promotePawn = function (side) {
         var sideText = side === SIDE.black ? "black" : "white";
         $('#select-piece-' + sideText).modal();

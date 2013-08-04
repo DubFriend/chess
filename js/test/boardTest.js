@@ -313,4 +313,28 @@ test("promote pawn - attack into position", function () {
     deepEqual(pawnPromotionData, SIDE.white, "published pawn promotion event");
 });
 
+var checkmateData;
+var setupCheckmateTests = function (extraSetup) {
+    boardModel = undefined;
+    boardData = undefined;
+    checkmateData = undefined;
+    var board = tLib.blankBoard();
+    board[0][1] = createPieceModel.rook({ side: SIDE.black });
+    board[3][2] = createPieceModel.king({ side: SIDE.black });
+    board[3][0] = createPieceModel.king({ side: SIDE.white });
+    if(extraSetup) {
+        extraSetup(board);
+    }
+    boardModel = createBoardModel({ board : board, side: SIDE.black });
+    boardModel.subscribe("winner", function (side) {
+        checkmateData = side;
+    });
+};
+
+test("checkmate", function () {
+    setupCastlingTests();
+    ok(boardModel.makeMove({ x: 1, y: 0 }, { x: 0, y: 0 }));
+    deepEqual(checkmateData, SIDE.black, "black published as the winner");
+});
+
 }());
