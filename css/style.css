@@ -22,8 +22,5 @@ html, body {
 }
 
 #board .selected {
-    z-index: 10;
-    -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.75);
-    -moz-box-shadow:    0 0 15px rgba(0, 0, 0, 0.75);
-    box-shadow:         0 0 15px rgba(0, 0, 0, 0.75);
+    background-color: rgb(120, 195, 238);
 }

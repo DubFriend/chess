@@ -13,8 +13,8 @@ var boardModel,
 
             homeRow = function (side) {
                 return _.map(
-                    [PIECE.rook, PIECE.knight, PIECE.bishop, PIECE.king,
-                     PIECE.queen, PIECE.bishop, PIECE.knight, PIECE.rook],
+                    [PIECE.rook, PIECE.knight, PIECE.bishop, PIECE.queen,
+                     PIECE.king, PIECE.bishop, PIECE.knight, PIECE.rook],
                     function (type) {
                         return { side: side, type: type };
                     }
@@ -127,6 +127,7 @@ test("makeMove - fail - move king into check by other king", function () {
 var setupCastlingTests = function (extraSetup) {
     boardModel = undefined;
     boardData = undefined;
+    sideData = undefined;
     var board = tLib.blankBoard();
     board[0][0] = createPieceModel.rook({ side: SIDE.black });
     board[0][7] = createPieceModel.rook({ side: SIDE.black });
@@ -139,6 +140,9 @@ var setupCastlingTests = function (extraSetup) {
     boardModel.subscribe("board", function (data) {
         boardData = data;
     });
+    boardModel.subscribe("side", function (data) {
+        sideData = data;
+    });
 };
 
 test("makeMove - castle kingside", function () {
@@ -146,6 +150,12 @@ test("makeMove - castle kingside", function () {
     ok(boardModel.makeMove({ x: 4, y: 0 }, { x: 6, y: 0 }));
     deepEqual(boardData[0][6], {side:SIDE.black,type:PIECE.king}, "king moved");
     deepEqual(boardData[0][5], {side:SIDE.black,type:PIECE.rook}, "rook moved");
+});
+
+test("makeMove - castling changes sides", function () {
+    setupCastlingTests();
+    boardModel.makeMove({ x: 4, y: 0 }, { x: 6, y: 0 });
+    deepEqual(sideData, SIDE.white, "sides changed after castle");
 });
 
 test("makeMove - castle queenside", function () {
@@ -197,6 +207,7 @@ test("makeMove - castling failed, castle into check", function () {
 var setupEnPassantTests = function (extraSetup) {
     boardModel = undefined;
     boardData = undefined;
+    sideData = undefined;
     var board = tLib.blankBoard();
     board[1][1] = createPieceModel.pawn({ side: SIDE.black });
     board[2][4] = createPieceModel.pawn({ side: SIDE.black });
@@ -211,6 +222,9 @@ var setupEnPassantTests = function (extraSetup) {
     boardModel.subscribe("board", function (data) {
         boardData = data;
     });
+    boardModel.subscribe("side", function (data) {
+        sideData = data;
+    });
 };
 
 test("makeMove - en passant - white", function () {
@@ -218,6 +232,14 @@ test("makeMove - en passant - white", function () {
     ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 3 }), "setup move");
     ok(boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "en passant move");
     deepEqual(boardData[3][1], null, "piece is captured");
+});
+
+test("makeMove - en passant - changes sides", function () {
+    setupEnPassantTests();
+    ok(boardModel.makeMove({ x: 1, y: 1 }, { x: 1, y: 3 }), "setup move");
+    ok(boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "en passant move");
+    deepEqual(sideData, SIDE.black, "sides changed after en passant move.");
+    //deepEqual(boardData[3][1], null, "piece is captured");
 });
 
 test("makeMove - en passant - black", function () {
@@ -241,6 +263,8 @@ test("makeMove - en passant - failed - missed opportunity", function () {
     ok(boardModel.makeMove({ x: 4, y: 2 }, { x: 4, y: 3 }), "switch sides");
     ok(!boardModel.makeMove({ x: 2, y: 3 }, { x: 1, y: 2 }), "failed en passant attempt");
 });
+
+
 
 var pawnPromotionData;
 var setupPawnPromotionTests = function (extraSetup) {

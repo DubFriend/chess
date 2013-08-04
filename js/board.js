@@ -25,8 +25,8 @@ createBoardModel = function (fig) {
         setupNewGameBoard = (function () {
             var homeRow = function (side) {
                     return _.map(
-                        ['rook', 'knight', 'bishop', 'king',
-                         'queen', 'bishop', 'knight', 'rook'],
+                        ['rook', 'knight', 'bishop', 'queen',
+                         'king', 'bishop', 'knight', 'rook'],
                         function (type) {
                             return createPieceModel[type]({ side: side });
                         }
@@ -312,6 +312,7 @@ createBoardModel = function (fig) {
                     !isCastleIntoCheck(start, end)
                 ) {
                     castle(start, end);
+                    changeSides();
                     isMoved = true;
                 }
                 else {
@@ -321,6 +322,7 @@ createBoardModel = function (fig) {
             else if(isEnPassantMove(start, end) && !isMoveIntoCheck(start, end)) {
                 setPiece(null, { x: end.x, y: start.y });
                 movePiece(start, end);
+                changeSides();
                 isMoved = true;
             }
             else if(isPawnPromotion(start, end) && !isMoveIntoCheck(start,end)) {
