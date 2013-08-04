@@ -21,6 +21,22 @@ html, body {
     top: 0;
 }
 
+.modal-body img {
+    width: 90px;
+}
+
+#select-piece-black .modal-dialog, #select-piece-white .modal-dialog {
+    width: 250px;
+}
+#select-piece-black .modal-content, #select-piece-white .modal-content {
+    background-color: rgba(256, 256, 256, 0.5);
+}
+
+#select-piece-black img, #select-piece-white img {
+    background-color: rgba(256, 256, 256, 0.5);
+}
+
+
 #board .selected {
     background-color: rgb(120, 195, 238);
 }

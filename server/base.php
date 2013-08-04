@@ -93,19 +93,16 @@ class Index_View extends View {
         </head>
         <body>
 
-
             <div class="modal fade" id="select-piece-black">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Promote Pawn</h4>
                         </div>
                         <div class="modal-body">
-                            ...
-                        </div>
-                        <div class="modal-footer">
-                            <a href="#" class="btn btn-primary">Select Piece</a>
+                            {{#black-pieces}}
+                                <a id="{{id}}" href="#"><img src="{{src}}" class="img-thumbnail"></a>
+                            {{/black-pieces}}
                         </div>
                     </div>
                 </div>
@@ -115,14 +112,12 @@ class Index_View extends View {
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Promote Pawn</h4>
                         </div>
                         <div class="modal-body">
-                            ...
-                        </div>
-                        <div class="modal-footer">
-                            <a href="#" class="btn btn-primary">Select Piece</a>
+                            {{#white-pieces}}
+                                <img id="{{id}}" src="{{src}}">
+                            {{/white-pieces}}
                         </div>
                     </div>
                 </div>
@@ -211,6 +206,7 @@ class Index_Controller extends Controller {
         $path = "js/";
         $libPath = $path . "lib/";
         $chess = "chessboard-0.1.0";
+        $imgPath = "img/chesspieces/wikipedia/";
         return array(
             "title" => "Chess",
             "css" => array(
@@ -218,7 +214,15 @@ class Index_Controller extends Controller {
                 "css/" . $chess . ".css",
                 "css/bootstrap.css"
             ),
-            "js" => $this->getJs()
+            "js" => $this->getJs(),
+            "black-pieces" => array(
+                array("src" => $imgPath . "bQ.png", "id" => "bQ"),
+                array("src" => $imgPath . "bN.png", "id" => "bN")
+            ),
+            "white-pieces" => array(
+                array("src" => $imgPath . "wQ.png", "id" => "wQ"),
+                array("src" => $imgPath . "wN.png", "id" => "wN")
+            )
         );
     }
 }

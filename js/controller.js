@@ -76,6 +76,25 @@ var createController = function (fig) {
         });
     };
 
+    that.bindPawnPromotionSelect = function () {
+        $('#bQ').click(function () {
+            $('#select-piece-black').modal('hide');
+            boardModel.promotePawn(PIECE.queen);
+        });
+        $('#bN').click(function () {
+            $('#select-piece-black').modal('hide');
+            boardModel.promotePawn(PIECE.knight);
+        });
+        $('#wQ').click(function () {
+            $('#select-piece-white').modal('hide');
+            boardModel.promotePawn(PIECE.queen);
+        });
+        $('#wN').click(function () {
+            $('#select-piece-white').modal('hide');
+            boardModel.promotePawn(PIECE.knight);
+        });
+    };
+
     //subscribes to boardModel's "board" topic, and updates the view.
     that.boardUpdate = function (modelBoard) {
         boardView.position(boardToView(modelBoard));

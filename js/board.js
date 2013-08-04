@@ -301,8 +301,25 @@ createBoardModel = function (fig) {
         that.publish("newGame", {});
     };
 
-    that.promotePawn = function (coord, newType) {
-        var piece = getPiece(coord),
+    var findPawnToPromoteCoord = function () {
+        var row = side() === SIDE.black ? 7 : 0,
+            foundCoord;
+
+        foreachSquare(board(), function (piece, coord) {
+            if(
+                coord.y === row && piece &&
+                piece.type() === PIECE.pawn &&
+                piece.side() === side()
+            ) {
+                foundCoord = coord;
+            }
+        });
+        return foundCoord;
+    };
+
+    that.promotePawn = function (newType) {
+        var coord = findPawnToPromoteCoord(),
+            piece = getPiece(coord),
             promoteType = _.invert(PIECE)[newType];
 
         if(

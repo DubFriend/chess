@@ -299,7 +299,7 @@ test("promote pawn", function () {
     ok(boardModel.makeMove({ x: 0, y: 1 }, { x: 0, y: 0 }));
     deepEqual(sideData, SIDE.white, "side still white (requires promotion choice)");
     deepEqual(pawnPromotionData, SIDE.white, "published pawn promotion event");
-    boardModel.promotePawn({ x: 0, y: 0 }, PIECE.bishop);
+    boardModel.promotePawn(PIECE.bishop);
     deepEqual(boardData[0][0], { type: PIECE.bishop, side: SIDE.white }, "board changed");
     deepEqual(sideData, SIDE.black, "changed sides after pawn promotion");
 });

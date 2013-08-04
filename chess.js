@@ -3484,6 +3484,7 @@ var stopDefault = function(e) {
 };
 
 var mousedownSquare = function(e) {
+
   // do nothing if we're not draggable
   if (cfg.draggable !== true) return;
 
@@ -3977,8 +3978,8 @@ createBoardModel = function (fig) {
         setupNewGameBoard = (function () {
             var homeRow = function (side) {
                     return _.map(
-                        ['rook', 'knight', 'bishop', 'king',
-                         'queen', 'bishop', 'knight', 'rook'],
+                        ['rook', 'knight', 'bishop', 'queen',
+                         'king', 'bishop', 'knight', 'rook'],
                         function (type) {
                             return createPieceModel[type]({ side: side });
                         }
@@ -4154,6 +4155,19 @@ createBoardModel = function (fig) {
             return isInCheck(tempBoard);
         },
 
+        isCastleThroughCheck = function (start, end) {
+            var tempBoard = cloneBoard(board());
+            movePiece(
+                start,
+                {
+                    x: end.x === 2 ? start.x - 1 : start.x + 1,
+                    y: end.y
+                },
+                tempBoard
+            );
+            return isInCheck(tempBoard);
+        },
+
         isKingsFirstMove = function () {
             var king = getPiece(getKingPositions(board())[side()]);
             return !king.isMoved;
@@ -4214,13 +4228,15 @@ createBoardModel = function (fig) {
 
         isPawnPromotion = function (start, end) {
             var piece = getPiece(start);
+
             return (
                 piece &&
-                piece.type() === PIECE.pawn && (
-                    (piece.side() === SIDE.white && start.y === 1 && end.y === 0) ||
-                    (piece.side() === SIDE.black && start.y === 6 && end.y === 7)
+                piece.type() === PIECE.pawn &&
+                (
+                    (piece.side() === SIDE.white && end.y === 0) ||
+                    (piece.side() === SIDE.black && end.y === 7)
                 ) &&
-                start.x === end.x
+                canPieceMove(start, end)
             );
         };
 
@@ -4235,10 +4251,28 @@ createBoardModel = function (fig) {
     that.newGame = function () {
         board(setupNewGameBoard());
         side(SIDE.white);
+        that.publish("newGame", {});
     };
 
-    that.promotePawn = function (coord, newType) {
-        var piece = getPiece(coord),
+    var findPawnToPromoteCoord = function () {
+        var row = side() === SIDE.black ? 7 : 0,
+            foundCoord;
+
+        foreachSquare(board(), function (piece, coord) {
+            if(
+                coord.y === row && piece &&
+                piece.type() === PIECE.pawn &&
+                piece.side() === side()
+            ) {
+                foundCoord = coord;
+            }
+        });
+        return foundCoord;
+    };
+
+    that.promotePawn = function (newType) {
+        var coord = findPawnToPromoteCoord(),
+            piece = getPiece(coord),
             promoteType = _.invert(PIECE)[newType];
 
         if(
@@ -4246,10 +4280,14 @@ createBoardModel = function (fig) {
             piece.type() === PIECE.pawn &&
             (coord.y === 0 || coord.y === 7)
         ) {
-            awaitingPawnPromotion = false;
             setPiece(createPieceModel[promoteType]({ side: side() }), coord);
             changeSides();
+            awaitingPawnPromotion = false;
         }
+    };
+
+    that.isOwnPiece = function (coord) {
+        return isOwnPiece(coord);
     };
 
     that.makeMove = function (start, end) {
@@ -4261,9 +4299,11 @@ createBoardModel = function (fig) {
                     isKingsFirstMove() &&
                     isRooksFirstMove(end) &&
                     isSpaceClearForCastle(end) &&
-                    !isCastleIntoCheck(start, end)
+                    !isCastleIntoCheck(start, end) &&
+                    !isCastleThroughCheck(start, end)
                 ) {
                     castle(start, end);
+                    changeSides();
                     isMoved = true;
                 }
                 else {
@@ -4273,6 +4313,7 @@ createBoardModel = function (fig) {
             else if(isEnPassantMove(start, end) && !isMoveIntoCheck(start, end)) {
                 setPiece(null, { x: end.x, y: start.y });
                 movePiece(start, end);
+                changeSides();
                 isMoved = true;
             }
             else if(isPawnPromotion(start, end) && !isMoveIntoCheck(start,end)) {
@@ -4304,24 +4345,142 @@ createBoardModel = function (fig) {
 //connects model to the view and handles user actions
 var createController = function (fig) {
     fig = fig || {};
+
     var that = jsMessage.mixinPubSub(),
-        board = fig.board || createBoardModel(),
-        view = fig.view || new ChessBoard(),
-        selectedSquare = null;
 
+        boardModel = fig.model || createBoardModel(),
+        boardView = fig.view || new ChessBoard('board'),
 
+        selectedSquare = null,
+
+        pieceMap = {
+            P: PIECE.pawn,
+            R: PIECE.rook,
+            N: PIECE.knight,
+            B: PIECE.bishop,
+            K: PIECE.king,
+            Q: PIECE.queen
+        },
+
+        sideMap = {
+            b: SIDE.black,
+            w: SIDE.white
+        },
+
+        pieceToModel = function (viewPiece) {
+            return {
+                type: pieceMap[viewPiece.charAt(1)],
+                side: sideMap[viewPiece.charAt(0)]
+            };
+        },
+
+        pieceToView = function (modelPiece) {
+            return (
+                _.invert(sideMap)[modelPiece.side] +
+                _.invert(pieceMap)[modelPiece.type]
+            );
+        },
+
+        coordToModel = function (viewCoord) {
+            return {
+                x: viewCoord.charCodeAt(0) - 97,
+                y: 8 - Number(viewCoord.charAt(1))
+            };
+        },
+
+        coordToView = function (modelCoord) {
+            return (
+                String.fromCharCode(modelCoord.x + 97) +
+                String(8 - modelCoord.y)
+            );
+        },
+
+        boardToView = function (modelBoard) {
+            var viewCoord = {};
+            _.each(modelBoard, function (row, rank) {
+                return _.each(row, function (piece, file) {
+                    if(piece) {
+                        var index = coordToView({ x: file, y: rank });
+                        viewCoord[index] = pieceToView(piece);
+                    }
+                });
+            });
+            return viewCoord;
+        };
+
+    that.newGame = function () {};
+    that.loadGame = function () {};
+
+    that.bindSquareClick = function () {
+        $('.square-55d63').click(function () {
+        $('.square-55d63').removeClass('selected');
+            if(that.clickSquare($(this).attr('data-square'))) {
+                $(this).addClass('selected');
+            }
+        });
+    };
+
+    that.bindPawnPromotionSelect = function () {
+        $('#bQ').click(function () {
+            $('#select-piece-black').modal('hide');
+            boardModel.promotePawn(PIECE.queen);
+        });
+        $('#bN').click(function () {
+            $('#select-piece-black').modal('hide');
+            boardModel.promotePawn(PIECE.knight);
+        });
+        $('#wQ').click(function () {
+            $('#select-piece-white').modal('hide');
+            boardModel.promotePawn(PIECE.queen);
+        });
+        $('#wN').click(function () {
+            $('#select-piece-white').modal('hide');
+            boardModel.promotePawn(PIECE.knight);
+        });
+    };
 
     //subscribes to boardModel's "board" topic, and updates the view.
-    that.onBoardUpdate = function (board) {
-
+    that.boardUpdate = function (modelBoard) {
+        boardView.position(boardToView(modelBoard));
     };
 
-    that.onSquareClick = function (coord, piece) {
-
+    that.promotePawn = function (side) {
+        var sideText = side === SIDE.black ? "black" : "white";
+        $('#select-piece-' + sideText).modal();
     };
 
-    that.onPieceDrop = function (start, end, piece) {
+    that.sideUpdate = function (data) {
+        var fadeTime = 200;
+        $('#status-indicator').html(data === SIDE.white ? "White's move." : "Black's move.");
+        if($('#is-change-orientation').is(":checked")) {
+            setTimeout(function () {
+                $('#board img').fadeOut(fadeTime);
+                setTimeout(function () {
+                    boardView.orientation(data === SIDE.white ? "white" : "black");
+                    var $pieces = $('#board img');
+                    $pieces.hide();
+                    $pieces.fadeIn(fadeTime);
+                    that.bindSquareClick();
+                }, fadeTime);
+            }, fadeTime);
+        }
+    };
 
+    that.clickSquare = function (viewCoord) {
+        var modelCoord = coordToModel(viewCoord);
+        if(selectedSquare) {
+            if(boardModel.isOwnPiece(modelCoord)) {
+                selectedSquare = modelCoord;
+            }
+            else {
+                boardModel.makeMove(selectedSquare, modelCoord);
+                selectedSquare = null;
+            }
+        }
+        else if(boardModel.isOwnPiece(modelCoord)) {
+            selectedSquare = modelCoord;
+        }
+        return selectedSquare ? true : false;
     };
 
     return that;
@@ -4329,43 +4488,32 @@ var createController = function (fig) {
 $(document).ready(function () {
 'use strict';
 
+var view = new ChessBoard('board', {
+    showNotation: false
+});
 
+var model = createBoardModel();
+var controller = createController({
+    model: model,
+    view: view
+});
 
-var boardConfig = {
-    draggable: true,
-    //showNotation: false,
-    position: 'start',
-    onDragStart: function (source, piece, position, orientation) {
-        console.log(source);
-        console.log(piece);
-        console.log(position);
-        console.log(orientation);
-        console.log('\n');
-    },
-    onDrop: function(source, target, piece, newPos, oldPos, orientation) {
-        console.log(source);
-        console.log(target);
-        console.log(piece);
-        console.log(newPos);
-        console.log(oldPos);
-        console.log(orientation);
-        console.log('\n');
-    }
-};
-
-var boardView = new ChessBoard('board', boardConfig);
+model.subscribe("board", _.bind(controller.boardUpdate, controller));
+model.newGame();
+model.subscribe("side", _.bind(controller.sideUpdate, controller));
+model.subscribe("pawnPromotion", _.bind(controller.promotePawn, controller));
 
 var setLayout = function () {
-    var $board = $('#board');
-    var $controls = $('#controls');
-    var width = $(window).width();
-    var height = $(window).height();
+    var $board = $('#board'),
+        $controls = $('#controls'),
+        width = $(window).width(),
+        height = $(window).height();
 
     $board.width(_.min([width, height]) - 1);
-    boardView.resize();
+    view.resize();
 
     if(width > height) {
-        $controls.width(width - height);
+        $controls.width(width - height - 5);
         $controls.addClass('horizontal-controls');
     }
     else {
@@ -4377,7 +4525,16 @@ var setLayout = function () {
 setLayout();
 
 $(window).resize(setLayout);
-$(window).resize(boardView.resize);
+$(window).resize(function () {
+    view.resize(arguments);
+    controller.bindSquareClick();
+});
+
+controller.bindSquareClick();
+controller.bindPawnPromotionSelect();
+
+//$('#select-piece-black').modal('show');
+
 });
 
 }());

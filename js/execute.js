@@ -44,7 +44,8 @@ $(window).resize(function () {
 });
 
 controller.bindSquareClick();
+controller.bindPawnPromotionSelect();
 
-$('#select-piece-black').modal('show');
+//$('#select-piece-black').modal('show');
 
 });
