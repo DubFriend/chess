@@ -91,6 +91,7 @@ class Index_View extends View {
                 <link href="{{.}}" rel="stylesheet">
             {{/css}}
         </head>
+
         <body>
 
             <div class="modal fade" id="select-piece-black">
@@ -101,7 +102,9 @@ class Index_View extends View {
                         </div>
                         <div class="modal-body">
                             {{#black-pieces}}
-                                <a id="{{id}}" href="#"><img src="{{src}}" class="img-thumbnail"></a>
+                                <a id="{{id}}" href="#">
+                                    <img src="{{src}}" class="img-thumbnail">
+                                </a>
                             {{/black-pieces}}
                         </div>
                     </div>
@@ -133,32 +136,73 @@ class Index_View extends View {
                 </div>
             </div>
 
-
             <div id="board"></div>
+
             <div id="controls">
-                <div id="status-indicator" class="well">New Game</div>
+
                 <div class="well">
-                <form>
-                    <button id="new-game" class="btn btn-primary">
-                        New Game
-                    </button>
-                </form>
-                <form class="form-inline">
-                    <input id="game-id" type="text" class="form-control"
-                        placeholder="Game Id" style="width:96px;">
-                    <button id="load-game" class="btn btn-default">
-                        Load Game
-                    </button>
-                </form>
-                <form>
-                    <div class="checkbox">
-                        <label>
-                        <input id="is-change-orientation" type="checkbox" value="" checked>
-                        Change Orientation On Move?
-                        </label>
+                    <div class="row">
+                        <div id="status-indicator" class="col-12">New Game</div>
                     </div>
-                </form>
+                    <div class="row">
+                        <div class="col-6">
+                            <button id="undo" class="btn btn-default">
+                                Undo Move
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button id="redo" class="btn btn-default">
+                                Redo Move
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="well">
+
+                    <div class="row">
+                        <div class="col-4">
+                            <button id="new-game" class="btn btn-primary">
+                                New Game
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button id="save-game" class="btn btn-default">
+                                Save Game
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <p><b>id:</b><span id="game-id"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <input id="game-id" type="text" class="form-control"
+                                   placeholder="Game Id">
+                        </div>
+                        <div class="col-6">
+                            <button id="load-game" class="btn btn-default">
+                                Load Game
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input
+                                        id="is-change-orientation"
+                                        type="checkbox" value="" checked>
+                                    Change Orientation On Move?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
             {{#js}}
                 <script src="{{.}}"></script>

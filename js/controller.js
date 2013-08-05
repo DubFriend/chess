@@ -95,6 +95,21 @@ var createController = function (fig) {
         });
     };
 
+    that.bindUndoRedo = function () {
+        $('#undo').click(_.bind(that.undo, that));
+        $('#redo').click(_.bind(that.redo, that));
+    };
+
+    that.undo = function () {
+        console.log("undo");
+        boardModel.undo();
+    };
+
+    that.redo = function () {
+        console.log("redo");
+        boardModel.redo();
+    };
+
     //subscribes to boardModel's "board" topic, and updates the view.
     that.boardUpdate = function (modelBoard) {
         boardView.position(boardToView(modelBoard));

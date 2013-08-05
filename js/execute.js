@@ -23,15 +23,15 @@ $(document).ready(function () {
             width = $(window).width(),
             height = $(window).height();
 
-        $board.width(_.min([width, height]) - 1);
+        $board.width(_.min([width, height]) - 2);
         view.resize();
 
         if(width > height) {
-            $controls.width(width - height - 5);
+            $controls.width(width - height - 0);
             $controls.addClass('horizontal-controls');
         }
         else {
-            $controls.width(width);
+            $controls.width(width - 2);
             $controls.removeClass('horizontal-controls');
         }
     };
@@ -46,5 +46,6 @@ $(document).ready(function () {
 
     controller.bindSquareClick();
     controller.bindPawnPromotionSelect();
+    controller.bindUndoRedo();
 
 });

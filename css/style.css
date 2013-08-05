@@ -7,14 +7,6 @@ html, body {
     margin: 0;
 }
 
-#controls {
-    margin: 0.5em;
-}
-
-#controls form {
-    margin: 0 0 1em 0;
-}
-
 .horizontal-controls {
     position: absolute;
     right: 0;
@@ -25,9 +17,32 @@ html, body {
     width: 90px;
 }
 
+#status-indicator {
+    font-size: 150%;
+}
+
+#controls .well {
+    margin:0.5em;
+}
+
+#controls .row {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+#controls .col-12, #controls .col-6, #controls .col-4 {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+#controls p {
+    margin-top: 9px;
+}
+
 #select-piece-black .modal-dialog, #select-piece-white .modal-dialog {
     width: 250px;
 }
+
 #select-piece-black .modal-content, #select-piece-white .modal-content {
     background-color: rgba(256, 256, 256, 0.5);
 }
@@ -36,12 +51,6 @@ html, body {
     background-color: rgba(256, 256, 256, 0.5);
 }
 
-
 #board .selected {
     background-color: rgb(120, 195, 238);
-}
-
-#controls .well {
-    width: 96%;
-    margin-bottom: 0.5em;
 }

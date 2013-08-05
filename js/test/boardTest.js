@@ -68,6 +68,39 @@ test("makeMove - ok", function () {
     deepEqual(boardData, startingBoard(), "rest of pieces in correct places");
 });
 
+test("undo/redo", function () {
+    boardModel.makeMove({ x: 0, y: 6 }, { x: 0, y: 5});
+
+    boardModel.undo();
+    deepEqual(boardData, startingBoard(), "undo to original setup");
+    deepEqual(sideData, SIDE.white, "undo side restored");
+
+    boardModel.redo();
+    deepEqual(
+        boardData[5][0],
+        { side: SIDE.white, type: PIECE.pawn },
+        "redo to original move"
+    );
+    deepEqual(sideData, SIDE.black, "redo side restored");
+});
+
+test("undo/redo multiple", function () {
+    boardModel.makeMove({ x: 0, y: 6 }, { x: 0, y: 5});
+    boardModel.makeMove({ x: 0, y: 1 }, { x: 0, y: 2});
+
+    boardModel.undo();
+    deepEqual(boardData[2][0], null, "first undo ok");
+
+    boardModel.undo();
+    deepEqual(boardData, startingBoard(), "second undo ok");
+
+    boardModel.redo();
+    deepEqual(boardData[5][0], {type: PIECE.pawn, side: SIDE.white}, "first redo ok");
+
+    boardModel.redo();
+    deepEqual(boardData[2][0], {type: PIECE.pawn, side: SIDE.black}, "second redo ok");
+});
+
 test("makeMove - fail - wrong player", function () {
     ok(!boardModel.makeMove({ x: 0, y: 1}, { x: 0, y: 2 }));
     deepEqual(boardData, startingBoard(), "board unchanged");
@@ -332,7 +365,7 @@ var setupCheckmateTests = function (extraSetup) {
 };
 
 test("checkmate", function () {
-    setupCastlingTests();
+    setupCheckmateTests();
     ok(boardModel.makeMove({ x: 1, y: 0 }, { x: 0, y: 0 }));
     deepEqual(checkmateData, SIDE.black, "black published as the winner");
 });

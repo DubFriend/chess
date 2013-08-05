@@ -8,10 +8,47 @@ createBoardModel = function (fig) {
     fig = fig || {};
     var that = jsMessage.mixinPubSub(),
 
+        gameStack = (function () {
+            var stack = [], redoStack = [];
+            return {
+                push: function (data) {
+                    stack.push(data);
+                },
+                undo: function () {
+                    var current = stack.pop();
+                    if(current) {
+                        redoStack.push(current);
+                        return _.last(stack);
+                    }
+                },
+                redo: function () {
+                    var oldState = redoStack.pop();
+                    if(oldState) {
+                        stack.push(oldState);
+                        return _.last(stack);
+                    }
+                }
+            };
+        }()),
+
         extractBoardData = function (board) {
             return _.map(board, function (row) {
                 return _.map(row, function (square) {
                     return square && { side: square.side(), type: square.type() };
+                });
+            });
+        },
+
+        buildGameFromData = function (boardData) {
+            return _.map(boardData, function (row) {
+                return _.map(row, function (square) {
+                    if(square) {
+                        var type = _.invert(PIECE)[square.type];
+                        return createPieceModel[type]({ side: square.side });
+                    }
+                    else {
+                        return null;
+                    }
                 });
             });
         },
@@ -122,12 +159,15 @@ createBoardModel = function (fig) {
 
         changeSides = function () {
             side(opponentSide());
+            gameStack.push({
+                board: extractBoardData(board()),
+                side: side()
+            });
             if(isGameOver()) {
                 that.publish("winner", opponentSide());
             }
         },
 
-        //if game is slow, this is a probably good place to optimize
         isGameOver = function () {
             var isGameOver = true,
                 tempBoard;
@@ -317,16 +357,41 @@ createBoardModel = function (fig) {
         };
 
     //optionally initialize board state.
-    if(fig.board) {
+    if(fig.board && fig.side) {
         board(fig.board);
-    }
-    if(fig.side) {
         side(fig.side);
+        gameStack.push({
+            board: extractBoardData(fig.board),
+            side: fig.side
+        });
     }
+    else if(fig.board || fig.side) {
+        throw "must supply board and side or none at all";
+    }
+
+    that.undo = function () {
+        var newState = gameStack.undo();
+        if(newState) {
+            side(newState.side);
+            board(buildGameFromData(newState.board));
+        }
+    };
+
+    that.redo = function () {
+        var newState = gameStack.redo();
+        if(newState) {
+            side(newState.side);
+            board(buildGameFromData(newState.board));
+        }
+    };
 
     that.newGame = function () {
         board(setupNewGameBoard());
         side(SIDE.white);
+        gameStack.push({
+            board: extractBoardData(board()),
+            side: side()
+        });
         that.publish("newGame", {});
     };
 
