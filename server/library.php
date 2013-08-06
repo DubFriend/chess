@@ -130,4 +130,15 @@ function sanitizeArray ($array) {
     }
     return $cleanArray;
 }
+
+function uniqueId ($len = 8) {
+    $hex = md5("sillyputty" . uniqid("", true));
+    $pack = pack('H*', $hex);
+    $uid = base64_encode($pack);
+    $uid = preg_replace("/[^A-Za-z0-9]/", "", $uid);
+    while(strlen($uid) < $len) {
+        $uid = $uid . gen_uuid(22);
+    }
+    return substr($uid, 0, $len);
+}
 ?>

@@ -385,6 +385,13 @@ createBoardModel = function (fig) {
         }
     };
 
+    that.getGameState = function () {
+        return {
+            side: side(),
+            board: extractBoardData(board())
+        };
+    };
+
     that.newGame = function () {
         board(setupNewGameBoard());
         side(SIDE.white);

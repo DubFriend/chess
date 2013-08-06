@@ -47,5 +47,6 @@ $(document).ready(function () {
     controller.bindSquareClick();
     controller.bindPawnPromotionSelect();
     controller.bindUndoRedo();
+    controller.bindSaveLoad();
 
 });

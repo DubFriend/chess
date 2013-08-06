@@ -4,6 +4,7 @@ require ROOT . "sequel.php";
 require ROOT . "factory.php";
 require ROOT . "router.php";
 require ROOT . "base.php";
+require ROOT . "game.php";
 require ROOT . 'mustache.php/src/Mustache/Autoloader.php';
 
 Mustache_Autoloader::register();
@@ -14,7 +15,7 @@ $get = sanitizeArray($_GET);
 $post = sanitizeArray($_POST);
 $server = sanitizeArray($_SERVER);
 
-$_GET = $_POST = $_SERVER = null;//force use of sanitized versions
+//$_GET = $_POST = $_SERVER = null;//force use of sanitized versions
 
 $Factory = new Factory(array(
     'get' => $get,

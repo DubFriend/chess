@@ -1,8 +1,11 @@
 //connects model to the view and handles user actions
 var createController = function (fig) {
+    "use strict";
     fig = fig || {};
 
-    var that = jsMessage.mixinPubSub(),
+    var URL_ROOT = "index.php/",
+
+        that = jsMessage.mixinPubSub(),
 
         boardModel = fig.model || createBoardModel(),
         boardView = fig.view || new ChessBoard('board'),
@@ -64,8 +67,70 @@ var createController = function (fig) {
             return viewCoord;
         };
 
-    that.newGame = function () {};
-    that.loadGame = function () {};
+    that.bindSaveLoad = function () {
+        $('#save-game').click(function () {
+            that.saveGame();
+        });
+        $('#load-game').click(function () {
+            that.loadGame($('#game-load-id').val());
+        });
+    };
+
+    that.saveGame = function () {
+        var gameState = boardModel.getGameState();
+        console.log(gameState);
+        $.ajax({
+            type: "POST",
+            url: URL_ROOT + 'game',
+            data: {
+                board: JSON.stringify(gameState.board),
+                side: gameState.side
+            },
+            beforeSend: function () {
+                $('#save-game').button('loading');
+            },
+            error: function () {
+                console.log(arguments);
+            },
+            success: function (gameId) {
+                $('#game-id').html(gameId);
+                console.log(arguments);
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#save-game').button('reset');
+                }, 300);
+            },
+            dataType: "json"
+        });
+    };
+
+    that.loadGame = function (gameId) {
+        console.log("id:" + gameId);
+        $.ajax({
+            type: "GET",
+            url: URL_ROOT + 'game/' + gameId,
+            beforeSend: function () {
+                $('#load-game').button('loading');
+            },
+            error: function () {
+                console.log(arguments);
+            },
+            success: function () {
+                console.log(arguments);
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#load-game').button('reset');
+                }, 300);
+            },
+            dataType: "json"
+        });
+    };
+
+    that.newGame = function () {
+
+    };
 
     that.bindSquareClick = function () {
         $('.square-55d63').click(function () {

@@ -5,13 +5,6 @@ abstract class Controller {
     const NOT_FOUND = "404";
     const ERROR = "500";
 
-    protected $get, $post;
-
-    function __construct(array $fig = array()) {
-        $this->get = tryArray($fig, 'get');
-        $this->post = tryArray($fig, 'post');
-    }
-
     function respond($method) {
         switch ($method) {
             case 'GET':
@@ -62,8 +55,8 @@ abstract class Controller {
 }
 
 
-abstract class View {
-    protected $Templator;
+class Index_View {
+    private $Templator;
 
     function __construct($Templator) {
         $this->Templator = $Templator;
@@ -73,11 +66,6 @@ abstract class View {
         return $this->Templator->render($this->template(), $data);
     }
 
-    abstract protected function template();
-}
-
-
-class Index_View extends View {
     protected function template() {
         return '
         <!DOCTYPE html>
@@ -146,12 +134,12 @@ class Index_View extends View {
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <button id="undo" class="btn btn-default">
+                            <button id="undo" class="btn btn-default btn-block">
                                 Undo Move
                             </button>
                         </div>
                         <div class="col-6">
-                            <button id="redo" class="btn btn-default">
+                            <button id="redo" class="btn btn-default btn-block">
                                 Redo Move
                             </button>
                         </div>
@@ -162,12 +150,12 @@ class Index_View extends View {
 
                     <div class="row">
                         <div class="col-4">
-                            <button id="new-game" class="btn btn-primary">
+                            <button id="new-game" class="btn btn-primary btn-block">
                                 New Game
                             </button>
                         </div>
                         <div class="col-4">
-                            <button id="save-game" class="btn btn-default">
+                            <button id="save-game" class="btn btn-default btn-block" data-loading-text="Saving...">
                                 Save Game
                             </button>
                         </div>
@@ -178,11 +166,11 @@ class Index_View extends View {
 
                     <div class="row">
                         <div class="col-6">
-                            <input id="game-id" type="text" class="form-control"
+                            <input id="game-load-id" type="text" class="form-control"
                                    placeholder="Game Id">
                         </div>
                         <div class="col-6">
-                            <button id="load-game" class="btn btn-default">
+                            <button id="load-game" class="btn btn-default" data-loading-text="Loading...">
                                 Load Game
                             </button>
                         </div>
