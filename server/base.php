@@ -224,7 +224,6 @@ class Index_Controller extends Controller {
                 $libPath . "jquery-2.0.3.js",
                 $libPath . "underscore.js",
                 $libPath . "bootstrap.js",
-                $libPath . "mustache.js",
                 $libPath . "jsmessage.js",
                 $path . $chess . ".js",
                 $path . "global.js",
@@ -234,11 +233,13 @@ class Index_Controller extends Controller {
                 $path . "execute.js"
             );
         }
-        else {
+        else if(DEPLOYMENT === "production") {
             return array(
-                $libPath . "jquery-2.0.3.js",
-                $libPath . "underscore.js",
-                $libPath . "mustache.js",
+                "http://code.jquery.com/jquery-1.10.1.min.js",
+                "http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js",
+                //$libPath . "jquery-2.0.3.js",
+                //$libPath . "underscore.js",
+                $libPath . "bootstrap.min.js",
                 "chess.min.js"
             );
         }
@@ -254,7 +255,7 @@ class Index_Controller extends Controller {
             "css" => array(
                 "css/style.css",
                 "css/" . $chess . ".css",
-                "css/bootstrap.css"
+                "css/bootstrap.min.css"
             ),
             "js" => $this->getJs(),
             "black-pieces" => array(

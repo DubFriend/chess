@@ -21,8 +21,6 @@ module.exports = function (grunt) {
             },
             dist: {
                 src: [
-                    'js/lib/underscore.js',
-                    'js/lib/mustache.js',
                     'js/intro.js',
                     'js/lib/jsmessage.js',
                     'js/chessboard-0.1.0.js',

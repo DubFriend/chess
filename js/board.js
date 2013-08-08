@@ -11,6 +11,10 @@ createBoardModel = function (fig) {
         gameStack = (function () {
             var stack = [], redoStack = [];
             return {
+                clear: function () {
+                    stack = [];
+                    redoStack = [];
+                },
                 push: function (data) {
                     stack.push(data);
                 },
@@ -392,7 +396,14 @@ createBoardModel = function (fig) {
         };
     };
 
+    that.loadGame = function (boardData, sideData) {
+        gameStack.clear();
+        board(buildGameFromData(boardData));
+        side(sideData);
+    };
+
     that.newGame = function () {
+        gameStack.clear();
         board(setupNewGameBoard());
         side(SIDE.white);
         gameStack.push({

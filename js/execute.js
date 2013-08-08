@@ -24,7 +24,14 @@ $(document).ready(function () {
             height = $(window).height();
 
         $board.width(_.min([width, height]) - 2);
+
         view.resize();
+
+        //$board.width($board.width() + 5);
+        //var $innerBoard = $('.chessboard-63f37');
+        //$innerBoard.width($innerBoard.width() + 5);
+        //var $row = $('.row-5277c');
+        //$row.width($row.width() + 5);
 
         if(width > height) {
             $controls.width(width - height - 0);
@@ -48,5 +55,5 @@ $(document).ready(function () {
     controller.bindPawnPromotionSelect();
     controller.bindUndoRedo();
     controller.bindSaveLoad();
-
+    controller.bindNewGame();
 });

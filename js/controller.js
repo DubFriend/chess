@@ -76,6 +76,12 @@ var createController = function (fig) {
         });
     };
 
+    that.bindNewGame = function () {
+        $('#new-game').click(function () {
+            boardModel.newGame();
+        });
+    };
+
     that.saveGame = function () {
         var gameState = boardModel.getGameState();
         console.log(gameState);
@@ -94,12 +100,9 @@ var createController = function (fig) {
             },
             success: function (gameId) {
                 $('#game-id').html(gameId);
-                console.log(arguments);
             },
             complete: function () {
-                setTimeout(function () {
-                    $('#save-game').button('reset');
-                }, 300);
+                $('#save-game').button('reset');
             },
             dataType: "json"
         });
@@ -116,13 +119,11 @@ var createController = function (fig) {
             error: function () {
                 console.log(arguments);
             },
-            success: function () {
-                console.log(arguments);
+            success: function (gameData) {
+                boardModel.loadGame(JSON.parse(gameData.board), gameData.side);
             },
             complete: function () {
-                setTimeout(function () {
-                    $('#load-game').button('reset');
-                }, 300);
+                $('#load-game').button('reset');
             },
             dataType: "json"
         });
@@ -134,7 +135,7 @@ var createController = function (fig) {
 
     that.bindSquareClick = function () {
         $('.square-55d63').click(function () {
-        $('.square-55d63').removeClass('selected');
+            $('.square-55d63').removeClass('selected');
             if(that.clickSquare($(this).attr('data-square'))) {
                 $(this).addClass('selected');
             }

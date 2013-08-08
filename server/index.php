@@ -15,7 +15,7 @@ $get = sanitizeArray($_GET);
 $post = sanitizeArray($_POST);
 $server = sanitizeArray($_SERVER);
 
-//$_GET = $_POST = $_SERVER = null;//force use of sanitized versions
+$_GET = $_POST = $_SERVER = null;//force use of sanitized versions
 
 $Factory = new Factory(array(
     'get' => $get,
