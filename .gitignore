@@ -1,2 +1,3 @@
 node_modules/
 .trash/
+server/database_config.php

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Chess</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/chessboard-0.1.0.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+</head>
+
+<body>
+
+    <div class="modal fade" id="select-piece-black">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Promote Pawn</h4>
+                </div>
+                <div class="modal-body">
+                    <a id="bQ">
+                        <img src="img/chesspieces/wikipedia/bQ.png">
+                    </a>
+                    <a id="bN">
+                        <img src="img/chesspieces/wikipedia/bN.png">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="select-piece-white">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Promote Pawn</h4>
+                </div>
+                <div class="modal-body">
+                    <a id="wQ">
+                        <img src="img/chesspieces/wikipedia/wQ.png">
+                    </a>
+                    <a id="wN">
+                        <img src="img/chesspieces/wikipedia/wN.png">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="display-winner">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title"></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="board"></div>
+
+    <div id="controls">
+
+        <div class="well">
+            <div class="row">
+                <div id="status-indicator" class="col-12">New Game</div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <button id="undo" class="btn btn-default btn-block">
+                        Undo Move
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button id="redo" class="btn btn-default btn-block">
+                        Redo Move
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="well">
+
+            <div class="row">
+                <div class="col-4">
+                    <button id="new-game" class="btn btn-primary btn-block">
+                        New Game
+                    </button>
+                </div>
+                <div class="col-4">
+                    <button id="save-game" class="btn btn-default btn-block" data-loading-text="Saving...">
+                        Save Game
+                    </button>
+                </div>
+                <div class="col-4">
+                    <p><b>id:</b><span id="game-id"></span></p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <input id="game-load-id" type="text" class="form-control"
+                           placeholder="Game Id">
+                </div>
+                <div class="col-6">
+                    <button id="load-game" class="btn btn-default" data-loading-text="Loading...">
+                        Load Game
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="checkbox">
+                        <label>
+                            <input
+                                id="is-change-orientation"
+                                type="checkbox" value="" checked>
+                            Change Orientation On Move?
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>
+                Source Available On
+                <a href="https://github.com/DubFriend/chess">GitHub</a>.
+            </p>
+        </div>
+
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="js/lib/bootstrap.min.js"></script>
+    <script src="chess.min.js"></script>
+</body>
+</html>

@@ -54,3 +54,8 @@ html, body {
 #board .selected {
     background-color: rgb(120, 195, 238);
 }
+
+.footer {
+    padding: 1em;
+}
+

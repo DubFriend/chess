@@ -2675,7 +2675,7 @@ var createController = function (fig) {
     "use strict";
     fig = fig || {};
 
-    var URL_ROOT = "index.php/",
+    var URL_ROOT = "respond.php/",
 
         that = jsMessage.mixinPubSub(),
 
