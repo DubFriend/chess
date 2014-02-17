@@ -20,5 +20,7 @@ define("DATABASE_PASS", "database_password");
 
 Then import the table defined in the file `server/install.sql` into your database.
 
+You may also need to adjust the variable "URL_ROOT" in `js/controller.js`
+
 You should be able to save a game to the server, and then load that same game,
 using the supplied game id.
