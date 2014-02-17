@@ -6,8 +6,8 @@
 
 Installation.
 
-create a file named "database_config.php" with your mysql database connection
-settings
+In the "server" folder create a file named "database_config.php" with your mysql
+database connection settings.
 ```php
 <?php
 //database connection settings
@@ -18,4 +18,7 @@ define("DATABASE_PASS", "database_password");
 ?>
 ```
 
-then import the table defined in the file `server/install.sql` into your database.
+Then import the table defined in the file `server/install.sql` into your database.
+
+You should be able to save a game to the server, and then load that same game,
+using the supplied game id.
