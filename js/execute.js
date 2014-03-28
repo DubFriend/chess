@@ -1,8 +1,14 @@
-$(document).ready(function () {
+// $(document).ready(function () {
+    // 'use strict';
+
+window.createChess = function (fig) {
     'use strict';
+    fig = fig || {};
 
     var view = new ChessBoard('board', {
-        showNotation: false
+        showNotation: false,
+        pieceTheme: fig.pieceTheme || undefined
+        // pieceTheme: 'Chess/img/chesspieces/wikipedia/{piece}.png'
     });
 
     var model = createBoardModel();
@@ -20,8 +26,10 @@ $(document).ready(function () {
     var setLayout = function () {
         var $board = $('#board'),
             $controls = $('#controls'),
-            width = $(window).width(),
-            height = $(window).height();
+            width = $('#chess-container').width(),
+            height = $('#chess-container').height();
+            // width = $(window).width(),
+            // height = $(window).height();
 
         $board.width(_.min([width, height]) - 2);
 
@@ -56,4 +64,5 @@ $(document).ready(function () {
     controller.bindUndoRedo();
     controller.bindSaveLoad();
     controller.bindNewGame();
-});
+};
+// });

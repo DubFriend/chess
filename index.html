@@ -9,7 +9,14 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/chessboard-0.1.0.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-
+    <style type="text/css">
+        #chess-container {
+            width: 90%;
+            max-height: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -60,78 +67,84 @@
         </div>
     </div>
 
-    <div id="board"></div>
+    <div id="chess-container">
 
-    <div id="controls">
+        <div id="board"></div>
 
-        <div class="well">
-            <div class="row">
-                <div id="status-indicator" class="col-12">New Game</div>
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <button id="undo" class="btn btn-default btn-block">
-                        Undo Move
-                    </button>
-                </div>
-                <div class="col-6">
-                    <button id="redo" class="btn btn-default btn-block">
-                        Redo Move
-                    </button>
-                </div>
-            </div>
-        </div>
 
-        <div class="well">
 
-            <div class="row">
-                <div class="col-4">
-                    <button id="new-game" class="btn btn-primary btn-block">
-                        New Game
-                    </button>
-                </div>
-                <div class="col-4">
-                    <button id="save-game" class="btn btn-default btn-block" data-loading-text="Saving...">
-                        Save Game
-                    </button>
-                </div>
-                <div class="col-4">
-                    <p><b>id:</b><span id="game-id"></span></p>
-                </div>
-            </div>
+        <div id="controls">
 
-            <div class="row">
-                <div class="col-6">
-                    <input id="game-load-id" type="text" class="form-control"
-                           placeholder="Game Id">
+            <div class="well">
+                <div class="row">
+                    <div id="status-indicator" class="col-12">New Game</div>
                 </div>
-                <div class="col-6">
-                    <button id="load-game" class="btn btn-default" data-loading-text="Loading...">
-                        Load Game
-                    </button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="checkbox">
-                        <label>
-                            <input
-                                id="is-change-orientation"
-                                type="checkbox" value="" checked>
-                            Change Orientation On Move?
-                        </label>
+                <div class="row">
+                    <div class="col-6">
+                        <button id="undo" class="btn btn-default btn-block">
+                            Undo Move
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button id="redo" class="btn btn-default btn-block">
+                            Redo Move
+                        </button>
                     </div>
                 </div>
             </div>
 
-        </div>
+            <div class="well">
 
-        <div class="footer">
-            <p>
-                Source Available On
-                <a href="https://github.com/DubFriend/chess">GitHub</a>.
-            </p>
+                <div class="row">
+                    <div class="col-4">
+                        <button id="new-game" class="btn btn-primary btn-block">
+                            New Game
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button id="save-game" class="btn btn-default btn-block" data-loading-text="Saving...">
+                            Save Game
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <p><b>id:</b><span id="game-id"></span></p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <input id="game-load-id" type="text" class="form-control"
+                               placeholder="Game Id">
+                    </div>
+                    <div class="col-6">
+                        <button id="load-game" class="btn btn-default" data-loading-text="Loading...">
+                            Load Game
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="checkbox">
+                            <label>
+                                <input
+                                    id="is-change-orientation"
+                                    type="checkbox" value="" checked>
+                                Change Orientation On Move?
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="footer">
+                <p>
+                    Source Available On
+                    <a href="https://github.com/DubFriend/chess">GitHub</a>.
+                </p>
+            </div>
+
         </div>
 
     </div>
@@ -140,5 +153,12 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
     <script src="js/lib/bootstrap.min.js"></script>
     <script src="chess.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            createChess({
+                // pieceTheme: 'Chess/img/chesspieces/wikipedia/{piece}.png'
+            });
+        });
+    </script>
 </body>
 </html>
