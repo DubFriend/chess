@@ -48,13 +48,24 @@ module.exports = function (grunt) {
 
         qunit: {
             files: ['js/test/index.html']
+        },
+
+        watch: {
+            scripts: {
+                files: ['**/*'],
+                tasks: ['jshint', 'concat', 'uglify', 'qunit'],
+                options: { spawn: true }
+            }
         }
+
+
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
     grunt.registerTask('test', ['jshint', 'qunit']);
